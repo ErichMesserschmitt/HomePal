@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Components/Style.qml</file>
+        <file>Components/qmldir</file>
+        <file>fonts/Koulen-Regular.ttf</file>
+        <file>Views/StartWindow.qml</file>
+        <file>Views/Background.qml</file>
+        <file>Views/MainView.qml</file>
+        <file>Items/CustomButton.qml</file>
+        <file>Items/InfoBlock.qml</file>
+        <file>../src/roomcontroller.cpp</file>
+        <file>../src/roomcontroller.h</file>
+        <file>Popups/SelectName.qml</file>
+    </qresource>
+</RCC>

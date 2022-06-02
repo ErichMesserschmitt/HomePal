@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/bluetooth.png</file>
+        <file>icons/cross.png</file>
+        <file>icons/trashcan.png</file>
+        <file>icons/delay.png</file>
+        <file>icons/edit.png</file>
+        <file>icons/onoff.png</file>
+    </qresource>
+</RCC>
