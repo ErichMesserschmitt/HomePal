@@ -11,6 +11,8 @@ enum ConnType {
     Init,
     CreateRoom,
     CreateComponent,
+    ComponentList,
+    RoomList,
     EditRoom,
     EditComponent,
     Journal,

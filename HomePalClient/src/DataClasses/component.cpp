@@ -11,6 +11,132 @@ Component::Component(QObject *parent) : QObject(parent)
 
 }
 
+QJsonDocument Component::toDoc(Component &comp)
+{
+    QJsonObject component;
+    component["type"] = comp.type();
+    component["name"] = comp.name();
+    component["roomIndex"] = comp.roomIndex();
+    component["lowPoint"] = comp.lowPoint();
+    component["highPoint"] = comp.highPoint();
+    component["delta"] = comp.delta();
+    component["type"] = comp.type();
+    component["isAuto"] = comp.isAuto();
+    QJsonArray enableAtArray;
+    QJsonArray disableAtArray;
+    QJsonArray infoArray;
+    for(auto& p : comp.enableAt()){
+        enableAtArray.append(p.toString(Qt::DateFormat::TextDate));
+    }
+    for(auto& p : comp.disableAt()){
+        disableAtArray.append(p.toString(Qt::DateFormat::TextDate));
+    }
+    for(auto& p : comp.info()){
+        infoArray.append(p);
+    }
+    component["enableAt"] = enableAtArray;
+    component["disableAt"] = disableAtArray;
+    component["info"] = infoArray;
+    return QJsonDocument(component);
+}
+
+Component Component::fromDoc(QJsonDocument &doc)
+{
+    Component component;
+    QJsonObject comp = doc.object();
+    component.setType(static_cast<ComponentType>(comp.value("type").toInt(0)));
+    QString name = comp.value("name").toString();
+    component.setName(name);
+    component.setRoomIndex(comp.value("roomIndex").toInt(0));
+    component.setLowPoint(comp.value("lowPoint").toDouble(0));
+    component.setHighPoint(comp.value("highPoint").toDouble(0));
+    component.setDelta(comp.value("delta").toDouble(0));
+    component.setIsAuto(comp.value("isAuto").toBool(false));
+    QJsonArray enableAtArray = comp.value("enableAt").toArray();
+    QList<QDateTime> enableAtList;
+    QJsonArray disableAtArray = comp.value("disableAt").toArray();
+    QList<QDateTime> disableAtList;;
+    QJsonArray infoArray = comp.value("info").toArray();
+    QList<QString> infoList;
+    for(auto a : enableAtArray) {
+        enableAtList.append(QDateTime::fromString(a.toString()));
+    }
+    for(auto a : disableAtArray) {
+        disableAtList.append(QDateTime::fromString(a.toString()));
+    }
+    for(auto a : infoArray) {
+        infoList.append(a.toString());
+    }
+
+    return component;
+}
+
+void Component::setIndex(int index)
+{
+    m_index = index;
+    Q_EMIT indexChanged();
+}
+
+void Component::setName(QString &name)
+{
+    m_name = name;
+    Q_EMIT nameChanged();
+}
+
+void Component::setLowPoint(float p)
+{
+    m_lowPoint = p;
+    Q_EMIT lowPointChanged();
+}
+
+void Component::setHighPoint(float p)
+{
+    m_highPoint = p;
+    Q_EMIT highPointChanged();
+}
+
+void Component::setDelta(float d)
+{
+    m_pointDelta = d;
+    Q_EMIT deltaChanged();
+}
+
+void Component::setInfo(QList<QString> info)
+{
+    m_info = info;
+    Q_EMIT infoChanged();
+}
+
+void Component::setType(ComponentType type)
+{
+    m_type = type;
+    Q_EMIT typeChanged();
+}
+
+void Component::setEnableAt(QList<QDateTime> d)
+{
+    m_enableAt = d;
+    Q_EMIT enableChanged();
+}
+
+void Component::setDisableAt(QList<QDateTime> d)
+{
+    m_disableAt = d;
+    Q_EMIT disableChanged();
+}
+
+void Component::setRoomIndex(int index)
+{
+    m_roomIndex = index;
+    Q_EMIT roomIndexChanged();
+}
+
+void Component::setIsAuto(bool v)
+{
+    m_auto = v;
+    Q_EMIT isAutoChanged();
+}
+
 
 
 

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Connection/connection.h"
-#include "Connection/tcpserver.h"
+#include "Connection/tcpclient.h"
+#include "DataClasses/component.h"
+#include "DataClasses/room.h"
 #include <QObject>
 #include <iostream>
 #include <vector>
@@ -25,14 +27,16 @@ public:
     void sendElement(QJsonDocument& doc);
 public slots:
     void onDataReceived();
+public:
+signals:
+    void journalReceived(QJsonDocument& doc);
+
 private:
     void processData(QJsonDocument& doc);
-    void disconnectClient();
-    void addComponent();
-    void addRoom();
-    void editComponent();
-    void editRoom();
-    void sendJournal();
+    void addComponent(Component& comp);
+    void addRoom(Room& room);
+    void editComponent(Component& comp);
+    void editRoom(Room& room);
 
 
     IClient* m_client;
