@@ -32,6 +32,7 @@ class RoomController : public QObject {
 public:
     Q_PROPERTY(QList<RoomGroup> rooms READ rooms NOTIFY roomsChanged)
     Q_PROPERTY(int selectedRoom READ selectedRoom WRITE setSelectedRoom NOTIFY selectedRoomChanged)
+    Q_PROPERTY(QList<Component> pendingComponents READ pendingComponents NOTIFY pendingComponentsChanged)
 
 public:
     explicit RoomController(ConnectionController* connController, QObject* parent = nullptr);
@@ -42,16 +43,21 @@ public:
 
     Q_INVOKABLE void addRoom(QString name);
     Q_INVOKABLE void requestNewDevices();
+    Q_INVOKABLE void selectComponent(QString customName, int index, int roomIndex);
 
 
     QList<RoomGroup> rooms() {return m_lastPage.m_rooms;}
+    QList<Component> pendingComponents() {return m_pendingComponents;}
 
 signals:
     void roomsChanged();
     void selectedRoomChanged();
+    void pendingComponentsChanged();
+
 public slots:
     void onJournalReceived(QJsonDocument& doc);
     void onFullJournalReceived(QJsonDocument& doc);
+    void onComponentsListReceived(QJsonDocument& doc);
 
 private:
     void testRooms();
@@ -61,5 +67,6 @@ private:
     JournalPage m_lastPage;
     QList<JournalPage> m_fullJournal;
     ConnectionController* m_connController;
+    QList<Component> m_pendingComponents;
 
 };

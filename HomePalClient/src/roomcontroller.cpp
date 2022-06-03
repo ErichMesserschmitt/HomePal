@@ -34,6 +34,27 @@ void RoomController::requestNewDevices()
     m_connController->requestComponent();
 }
 
+void RoomController::selectComponent(QString customName, int index, int roomIndex)
+{
+    Component comp;
+    for(auto c : m_pendingComponents){
+        if(c.index() == index){
+            comp = c;
+            break;
+        }
+    }
+    if(comp.index() != index){
+        return;
+    }
+    if(!customName.isEmpty()){
+        comp.setName(customName);
+    }
+    if(roomIndex > 0) {
+        comp.setRoomIndex(roomIndex);
+    }
+    m_connController->addComponent(comp);
+}
+
 void RoomController::onJournalReceived(QJsonDocument &doc)
 {
     qDebug() << "RoomController::onJournalReceived :: received last journal page";
@@ -77,6 +98,18 @@ void RoomController::onFullJournalReceived(QJsonDocument &doc)
         m_fullJournal.append(currentPage);
     }
     qDebug() << "RoomController::onFullJournalReceived :: received" << m_fullJournal.size() << "pages";
+}
+
+void RoomController::onComponentsListReceived(QJsonDocument &doc)
+{
+    QJsonObject d = doc.object();
+    QJsonArray compArray = d.value("components").toArray();
+    m_pendingComponents.clear();
+    for(auto comp : compArray){
+        QJsonDocument tdoc(comp.toObject());
+        m_pendingComponents.append(Component::fromDoc(tdoc));
+    }
+    Q_EMIT pendingComponentsChanged();
 }
 
 void RoomController::testRooms()

@@ -7,15 +7,17 @@
 ConnectionController::ConnectionController(QObject *parent) : QObject(parent)
 {
     qDebug() << "ConnectionController::ConnectionController is initialized";
-
-    startClient();
-
 }
 
 void ConnectionController::startClient()
 {
     m_client = new ClientTCP(QStringLiteral("ws://") + m_defaultAdress + ":" + QString::number(m_defaultPort));
     connect(m_client, &IClient::receivedDataChanged, this, &ConnectionController::onDataReceived);
+}
+
+void ConnectionController::stopClient()
+{
+    m_client->disconnect(this);
 }
 
 void ConnectionController::requestComponent()
@@ -40,6 +42,9 @@ void ConnectionController::processData(QJsonDocument &doc)
     switch(dataType){
     case ConnType::Init:
 
+    case ConnType::ComponentList:
+        Q_EMIT componentListReceived(doc);
+        return;
     case ConnType::CreateComponent:
     case ConnType::CreateRoom:
     case ConnType::EditRoom:
@@ -47,7 +52,7 @@ void ConnectionController::processData(QJsonDocument &doc)
         qDebug() << "ConnectionController::processData :: nothing to do with this type of data on client side" << dataType;
         return;
     case ConnType::Journal:
-        journalReceived(doc);
+        Q_EMIT journalReceived(doc);
         return;
     case ConnType::Disconnect:
         qDebug() << "ConnectionController::processData :: client preparing for disconnect";

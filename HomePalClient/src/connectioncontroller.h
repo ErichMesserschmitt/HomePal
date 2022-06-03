@@ -22,8 +22,8 @@ public:
     explicit ConnectionController(QObject* parent = nullptr);
 
 public:
-    void startClient();
-    void stopClient();
+    Q_INVOKABLE void startClient();
+    Q_INVOKABLE void stopClient();
 
     void requestComponent();
     void addComponent(Component& comp);
@@ -36,6 +36,7 @@ public slots:
 public:
 signals:
     void journalReceived(QJsonDocument& doc);
+    void componentListReceived(QJsonDocument& doc);
 private:
     void processData(QJsonDocument& doc);
     IClient* m_client;
