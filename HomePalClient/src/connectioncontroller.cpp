@@ -18,6 +18,15 @@ void ConnectionController::startClient()
     connect(m_client, &IClient::receivedDataChanged, this, &ConnectionController::onDataReceived);
 }
 
+void ConnectionController::requestComponent()
+{
+    QJsonDocument doc;
+    QJsonObject d = doc.object();
+    d["type"] = ConnType::RequestComponents;
+    doc = QJsonDocument(d);
+    m_client->sendData(doc);
+}
+
 void ConnectionController::onDataReceived()
 {
     qDebug() << "ConnectionController::onDataReceived :: signal emmited";
@@ -35,12 +44,14 @@ void ConnectionController::processData(QJsonDocument &doc)
     case ConnType::CreateRoom:
     case ConnType::EditRoom:
     case ConnType::EditComponent:
-        qDebug() << "ConnectionController::processData :: nothing to do with this type on client side" << dataType;
+        qDebug() << "ConnectionController::processData :: nothing to do with this type of data on client side" << dataType;
         return;
     case ConnType::Journal:
         journalReceived(doc);
         return;
     case ConnType::Disconnect:
+        qDebug() << "ConnectionController::processData :: client preparing for disconnect";
+        m_client->disconnect(this);
         return;
 
     default:
@@ -51,5 +62,35 @@ void ConnectionController::processData(QJsonDocument &doc)
 void ConnectionController::addComponent(Component &comp)
 {
     QJsonDocument doc = Component::toDoc(comp);
+    QJsonObject d = doc.object();
+    d["type"] = ConnType::CreateComponent;
+    doc = QJsonDocument(d);
+    m_client->sendData(doc);
+}
+
+void ConnectionController::addRoom(RoomGroup &room)
+{
+    QJsonDocument doc = RoomGroup::toDoc(room);
+    QJsonObject d = doc.object();
+    d["type"] = ConnType::CreateRoom;
+    doc = QJsonDocument(d);
+    m_client->sendData(doc);
+}
+
+void ConnectionController::editComponent(Component &comp)
+{
+    QJsonDocument doc = Component::toDoc(comp);
+    QJsonObject d = doc.object();
+    d["type"] = ConnType::EditComponent;
+    doc = QJsonDocument(d);
+    m_client->sendData(doc);
+}
+
+void ConnectionController::editRoom(RoomGroup &room)
+{
+    QJsonDocument doc = RoomGroup::toDoc(room);
+    QJsonObject d = doc.object();
+    d["type"] = ConnType::EditRoom;
+    doc = QJsonDocument(d);
     m_client->sendData(doc);
 }

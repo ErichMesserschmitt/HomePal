@@ -48,7 +48,7 @@ private:
     IServer* m_client;
     ServerTCP* m_server;
     QVector<Component> m_components;
-    QVector<Room> m_rooms;
+    QVector<RoomGroup> m_rooms;
     QString m_defaultAdress = QStringLiteral("127.0.0.1");
     int m_defaultPort = 1488;
 };

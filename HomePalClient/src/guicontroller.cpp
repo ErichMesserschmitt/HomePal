@@ -12,8 +12,8 @@
 GUI_Controller::GUI_Controller(QObject *parent) : QObject(parent)
 {
     m_engine = new QQmlApplicationEngine(parent);
-    m_roomController = new RoomController(this);
     m_connController = new ConnectionController(this);
+    m_roomController = new RoomController(m_connController, this);
 
     QQmlContext *ctx = m_engine->rootContext();
     ctx->setContextProperty(QStringLiteral("_appController"), this);
@@ -28,6 +28,7 @@ GUI_Controller::GUI_Controller(QObject *parent) : QObject(parent)
     m_initStartTimer.start();
     connect(&m_initStartTimer, &QTimer::timeout, this, &GUI_Controller::initializationFinished);
 
+    connect(m_connController, &ConnectionController::journalReceived, m_roomController, &RoomController::onJournalReceived);
 
 }
 

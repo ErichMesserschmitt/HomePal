@@ -4,38 +4,42 @@
 #include <iostream>
 #include <vector>
 #include <QTimer>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 
 
-class Room : public QObject {
+class RoomGroup : public QObject {
     Q_OBJECT
 public:
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(int index READ index NOTIFY indexChanged)
 public:
-    Room(QObject* parent = nullptr);
-    Room(const Room& other):
+    RoomGroup(QObject* parent = nullptr);
+    RoomGroup(const RoomGroup& other):
         QObject(other.parent())
     {
     }
-    Room& operator=(const Room& other){
+    RoomGroup& operator=(const RoomGroup& other){
         return *this;
     }
-
 public:
     void setIndex(int index);
     void setName(QString& name);
-    void addComponent(Component& component);
+
+    static QJsonDocument toDoc(RoomGroup& room);
+    static RoomGroup fromDoc(QJsonDocument& doc);
 
     QString name() {
         return m_name;
     }
-
+    int index() {
+        return m_index;
+    }
 signals:
     void nameChanged();
+    void indexChanged();
 private:
-    bool checkIndex(int index);
-
-    int m_roomIndex = 0;
-    QString m_name = "Default Room " + QString::number(m_roomIndex);
-    QVector<Component> m_components;
+    int m_index = 0;
+    QString m_name = "Default Room " + QString::number(m_index);
 };

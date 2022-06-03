@@ -16,6 +16,8 @@ enum ConnType {
     EditRoom,
     EditComponent,
     Journal,
+    LastPage,
+    RequestComponents,
     Disconnect,
     _maxId
 };

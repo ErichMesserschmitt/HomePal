@@ -6,13 +6,13 @@
 #include <QQmlContext>
 
 
-Room::Room(QObject *parent) : QObject(parent)
+RoomGroup::RoomGroup(QObject *parent) : QObject(parent)
 {
 
 
 }
 
-void Room::addComponent(Component& component)
+void RoomGroup::addComponent(Component& component)
 {
     bool m_indexCorrect = false;
     int index = m_components.length();
@@ -25,14 +25,14 @@ void Room::addComponent(Component& component)
     m_components.push_back(component);
 }
 
-void Room::setIndex(int index)
+void RoomGroup::setIndex(int index)
 {
     if(m_index != index) {
         m_index = index;
     }
 }
 
-void Room::setName(QString &name)
+void RoomGroup::setName(QString &name)
 {
     if(name != m_name){
         m_name = name;
@@ -40,7 +40,7 @@ void Room::setName(QString &name)
     }
 }
 
-bool Room::checkIndex(int index)
+bool RoomGroup::checkIndex(int index)
 {
     for(auto& component : m_components) {
         if(component.index() == index){

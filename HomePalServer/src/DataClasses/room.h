@@ -7,17 +7,17 @@
 
 
 
-class Room : public QObject {
+class RoomGroup : public QObject {
     Q_OBJECT
 public:
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
 public:
-    Room(QObject* parent = nullptr);
-    Room(const Room& other):
+    RoomGroup(QObject* parent = nullptr);
+    RoomGroup(const RoomGroup& other):
         QObject(other.parent())
     {
     }
-    Room& operator=(const Room& other){
+    RoomGroup& operator=(const RoomGroup& other){
         return *this;
     }
 

@@ -24,21 +24,20 @@ public:
 public:
     void startClient();
     void stopClient();
-    void sendElement(QJsonDocument& doc);
+
+    void requestComponent();
+    void addComponent(Component& comp);
+    void addRoom(RoomGroup& room);
+    void editComponent(Component& comp);
+    void editRoom(RoomGroup& room);
+
 public slots:
     void onDataReceived();
 public:
 signals:
     void journalReceived(QJsonDocument& doc);
-
 private:
     void processData(QJsonDocument& doc);
-    void addComponent(Component& comp);
-    void addRoom(Room& room);
-    void editComponent(Component& comp);
-    void editRoom(Room& room);
-
-
     IClient* m_client;
     EchoServer* m_server;
     QString m_defaultAdress = QStringLiteral("127.0.0.1");

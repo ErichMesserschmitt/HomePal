@@ -7,7 +7,7 @@
 #include <QQmlApplicationEngine>
 #include <QTimer>
 
-class Room;
+class RoomGroup;
 
 class RoomController : public QObject {
     Q_OBJECT
@@ -25,7 +25,7 @@ public:
 
     Q_INVOKABLE void addRoom(QString name);
 
-    QList<Room*> rooms() {return m_rooms;}
+    QList<RoomGroup*> rooms() {return m_rooms;}
 signals:
     void roomsChanged();
     void selectedRoomChanged();
@@ -34,7 +34,7 @@ private:
 
     int m_selectedRoom = 0;
 
-    QList<Room*> m_rooms;
+    QList<RoomGroup*> m_rooms;
 
 
 };

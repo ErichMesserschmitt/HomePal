@@ -21,7 +21,7 @@ void RoomController::setSelectedRoom(int roomIndex)
 
 void RoomController::addRoom(QString name)
 {
-    Room room;
+    RoomGroup room;
     QString l_name = name + " " + QString::number(m_rooms.length());
     room.setIndex(m_rooms.length());
     m_rooms.append(&room);
@@ -31,11 +31,11 @@ void RoomController::addRoom(QString name)
 void RoomController::testRooms()
 {
     for(int i =0; i<2; ++i){
-        Room room;
+        RoomGroup room;
         room.setIndex(i + 1);
         QString name = "Room N" + QString::number(i + 1);
         room.setName(name);
-        m_rooms.append(new Room(this));
+        m_rooms.append(new RoomGroup(this));
     }
     Q_EMIT roomsChanged();
 }

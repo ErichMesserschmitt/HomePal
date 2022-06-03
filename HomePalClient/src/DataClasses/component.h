@@ -15,6 +15,7 @@ enum ComponentType {
     _minid = 0,
     Switcher = 1,
     Slider,
+    Room,
     _maxid
 };
 
@@ -26,9 +27,9 @@ public:
     Q_PROPERTY(float lowPoint       READ lowPoint   NOTIFY lowPointChanged)
     Q_PROPERTY(float highPoint      READ highPoint  NOTIFY highPointChanged)
     Q_PROPERTY(float delta          READ delta      NOTIFY deltaChanged)
-    Q_PROPERTY(QVariantList info    READ info       NOTIFY infoChanged)
-    Q_PROPERTY(QVariantList enableAt READ enableAt  NOTIFY enableChanged)
-    Q_PROPERTY(QVariantList disableAt READ disableAt NOTIFY disableChanged)
+    Q_PROPERTY(QList<QString> info    READ info       NOTIFY infoChanged)
+    Q_PROPERTY(QList<QDateTime> enableAt READ enableAt  NOTIFY enableChanged)
+    Q_PROPERTY(QList<QDateTime> disableAt READ disableAt NOTIFY disableChanged)
     Q_PROPERTY(int type             READ type       NOTIFY typeChanged)
     Q_PROPERTY(int roomIndex        READ roomIndex  NOTIFY roomIndexChanged)
     Q_PROPERTY(bool isAuto          READ isAuto     NOTIFY isAutoChanged)

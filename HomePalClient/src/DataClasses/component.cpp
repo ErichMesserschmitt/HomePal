@@ -14,13 +14,12 @@ Component::Component(QObject *parent) : QObject(parent)
 QJsonDocument Component::toDoc(Component &comp)
 {
     QJsonObject component;
-    component["type"] = comp.type();
+    component["el_type"] = comp.type();
     component["name"] = comp.name();
     component["roomIndex"] = comp.roomIndex();
     component["lowPoint"] = comp.lowPoint();
     component["highPoint"] = comp.highPoint();
     component["delta"] = comp.delta();
-    component["type"] = comp.type();
     component["isAuto"] = comp.isAuto();
     QJsonArray enableAtArray;
     QJsonArray disableAtArray;
@@ -44,7 +43,7 @@ Component Component::fromDoc(QJsonDocument &doc)
 {
     Component component;
     QJsonObject comp = doc.object();
-    component.setType(static_cast<ComponentType>(comp.value("type").toInt(0)));
+    component.setType(static_cast<ComponentType>(comp.value("el_type").toInt(0)));
     QString name = comp.value("name").toString();
     component.setName(name);
     component.setRoomIndex(comp.value("roomIndex").toInt(0));
