@@ -28,7 +28,7 @@ public:
 signals:
     void dataProcessed(QJsonDocument& doc, QWebSocket* socket = nullptr);
 public slots:
-    void onDataReceived(QWebSocket* socket);
+    void onDataReceived(QJsonDocument doc, QWebSocket* socket);
 private:
     void processData(QJsonDocument& doc, QWebSocket* socket = nullptr);
     void disconnectClient(QWebSocket* socket);

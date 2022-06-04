@@ -109,3 +109,21 @@ void ConnectionController::editRoom(RoomGroup &room)
     doc = QJsonDocument(d);
     m_client->sendData(doc);
 }
+
+void ConnectionController::deleteRoom(RoomGroup &room)
+{
+    QJsonDocument doc = RoomGroup::toDoc(room);
+    QJsonObject d = doc.object();
+    d["type"] = ConnType::DeleteRoom;
+    doc = QJsonDocument(d);
+    m_client->sendData(doc);
+}
+
+void ConnectionController::deleteComponent(Component &comp)
+{
+    QJsonDocument doc = Component::toDoc(comp);
+    QJsonObject d = doc.object();
+    d["type"] = ConnType::DeleteComponent;
+    doc = QJsonDocument(d);
+    m_client->sendData(doc);
+}

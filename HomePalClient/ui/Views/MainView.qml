@@ -62,7 +62,7 @@ Item {
             Layout.fillHeight: false;
             Layout.preferredHeight: root.height * 0.1
             Layout.fillWidth: true;
-            property bool selectorVisible: _roomController ? _roomController.rooms < 3 : true && roomList.length > 0
+            property bool selectorVisible: roomList.length < 3 && roomList.length > 0
             property var roomList: _roomController ? _roomController.rooms : []
             property int selected: 0;
 
@@ -131,7 +131,7 @@ Item {
                 onClicked: {
                     //_roomController.addRoom("Test room");
                     console.log("_roomController.components", _roomController.components.length)
-                    editRoomNamePopup.open()
+                    createRoomNamePopup.open()
                 }
             }
         }
@@ -149,7 +149,7 @@ Item {
             readonly property int rows: proposedRows * columns < itemsCount ? proposedRows + 1 : proposedRows
 
 
-            contentHeight: proposedHeight * rows + (rows - 1) * columnSpacing
+            contentHeight: proposedHeight * rows + ((rows + 2) * columnSpacing)
             contentWidth: width
 
             flickableDirection: Flickable.VerticalFlick
@@ -222,6 +222,9 @@ Item {
                 fontSize: height * 0.5
                 fontFamily: Style.fontMain.name
                 text: "Edit"
+                onClicked: {
+                    editRoomNamePopup.open()
+                }
             }
             CustomButton {
                 Layout.fillHeight: true;
@@ -234,6 +237,29 @@ Item {
         }
     }
     Popup {
+        id: createRoomNamePopup
+        width: root.width
+        height: root.height
+        modal: true
+        dim: true
+        focus: true
+        background: Rectangle {
+            color: Style.transparent
+        }
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        contentItem: SelectName {
+            headerText: "Create name for room"
+            onAccepted: function(name) {
+                console.log("createRoomNamePopup::accepted", name)
+                createRoomNamePopup.close();
+            }
+            onDeclined:{
+                createRoomNamePopup.close();
+            }
+        }
+    }
+
+    Popup {
         id: editRoomNamePopup
         width: root.width
         height: root.height
@@ -243,23 +269,40 @@ Item {
         background: Rectangle {
             color: Style.transparent
         }
-
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-        onOpened: {
-
-        }
-
         contentItem: SelectName {
-            id: updateInfoPopup
-            onAccepted: {
-                console.log("CLOSED", name)
+            headerText: "Edit name for room"
+            onAccepted: function(name) {
+                console.log("editRoomNamePopup::accepted", name)
                 editRoomNamePopup.close();
             }
             onDeclined:{
-                console.log("CLOSED")
                 editRoomNamePopup.close();
             }
+        }
+    }
 
+    Popup {
+        id: createComponentNamePopup
+        width: root.width
+        height: root.height
+        modal: true
+        dim: true
+        focus: true
+        background: Rectangle {
+            color: Style.transparent
+        }
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        contentItem: SelectName {
+            headerText: "Create name for component"
+            onAccepted: {
+                console.log("CLOSED", name)
+                createRoomNamePopup.close();
+            }
+            onDeclined:{
+                console.log("CLOSED")
+                createRoomNamePopup.close();
+            }
         }
     }
 

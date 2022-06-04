@@ -14,6 +14,8 @@ enum ConnType {
     ComponentList,
     EditRoom,
     EditComponent,
+    DeleteComponent,
+    DeleteRoom,
     Journal,
     LastPage,
     RequestComponents,

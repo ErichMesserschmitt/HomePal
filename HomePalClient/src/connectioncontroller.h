@@ -30,6 +30,8 @@ public:
     void addRoom(RoomGroup& room);
     void editComponent(Component& comp);
     void editRoom(RoomGroup& room);
+    void deleteRoom(RoomGroup& room);
+    void deleteComponent(Component& comp);
 
 public slots:
     void onDataReceived();

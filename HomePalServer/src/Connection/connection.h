@@ -12,13 +12,17 @@ enum ConnType {
     CreateRoom,
     CreateComponent,
     ComponentList,
-    RoomList,
     EditRoom,
     EditComponent,
+    DeleteComponent,
+    DeleteRoom,
     Journal,
+    LastPage,
+    RequestComponents,
     Disconnect,
     _maxId
 };
+
 class QWebSocket;
 
 class IServer : public QObject {
@@ -40,7 +44,7 @@ public:
     virtual void disconnectClient(QWebSocket* socket) = 0;
 
 signals:
-    void receivedDataChanged(QWebSocket* socket);
+    void receivedData(QJsonDocument arr, QWebSocket* socket);
 public slots:
     void socketDisconnected() {qDebug() << "Socket disconnected";};
 

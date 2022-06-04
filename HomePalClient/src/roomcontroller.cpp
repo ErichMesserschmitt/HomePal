@@ -133,7 +133,7 @@ void RoomController::onComponentsListReceived(QJsonDocument &doc)
 
 void RoomController::testRooms()
 {
-    for(int i =0; i<5; ++i){
+    for(int i =0; i<2; ++i){
         RoomGroup room;
         room.setIndex(i);
         QString name = i == 0 ? "Home" : "Room N" + QString::number(i);

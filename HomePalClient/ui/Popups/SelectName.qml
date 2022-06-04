@@ -13,10 +13,10 @@ Item {
     Rectangle {
         id: background;
         anchors.fill: parent;
-        color: Style.semiTransparent
+        color: Style.semiTransparentPress
     }
-
-    signal accepted(var name)
+    property string headerText: "Create name"
+    signal accepted(string name)
     signal declined()
     Rectangle {
         id: mainBlock
@@ -27,35 +27,72 @@ Item {
         color: Style.white
         ColumnLayout {
             anchors.fill: mainBlock
-            anchors.margins: root.height * 0.1
+            anchors.margins: root.height * 0.05
             Rectangle {
                 Layout.fillHeight: false;
-                Layout.preferredHeight: root.height * 0.3
+                Layout.preferredHeight: root.height * 0.15
                 Layout.fillWidth: true;
                 radius: Style.defaultRadius
                 color: Style.darkOrange
                 Text {
                     anchors.fill: parent;
-                    text: "Enter name"
+                    text: root.headerText
                     font.family: Style.fontMain.name
                     color: Style.white
+                    leftPadding: Style.defaultRadius * 2
+                    rightPadding: leftPadding
+                    font.pixelSize: height * 0.5
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                 }
             }
             Item {
                 Layout.fillHeight: true;
                 Layout.fillWidth: true;
-                TextInput {
-                    id: textInput
-                    anchors.centerIn: parent;
-                    height: mainBlock.height * 0.3
-                    width: parent.width
-                }
             }
 
+            Rectangle {
+                Layout.fillHeight: false;
+                Layout.preferredHeight: root.height * 0.15
+                Layout.fillWidth: true;
+                color: Style.white
+                radius: Style.defaultRadius
+                border.width: Style.defaultWidth
+                border.color: textInput.activeFocus ? Style.blue : Style.orange
+
+                TextInput {
+                    id: textInput
+                    anchors.fill: parent;
+                    font.family: Style.fontMain.name
+                    leftPadding: Style.defaultRadius * 2
+                    rightPadding: leftPadding
+                    font.pixelSize: height * 0.5
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    maximumLength: 30
+                    clip: true;
+                }
+                Text {
+                    anchors.fill: parent;
+                    visible: textInput.text.length === 0 && !textInput.activeFocus
+                    text: "Enter text"
+                    color: Style.lightGrey
+                    font.family: Style.fontMain.name
+                    leftPadding: Style.defaultRadius * 2
+                    rightPadding: leftPadding
+                    font.pixelSize: height * 0.5
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+            Item {
+                Layout.fillHeight: true;
+                Layout.fillWidth: true;
+            }
 
             RowLayout {
                 Layout.fillHeight: false;
-                Layout.preferredHeight:  mainBlock.height * 0.3
+                Layout.preferredHeight:  mainBlock.height * 0.15
                 Layout.fillWidth: true;
 
                 CustomButton {
@@ -67,7 +104,7 @@ Item {
                     text: "OK"
                     textColor: Style.homeScreenGreen
                     onClicked: {
-                        root.accepted("textInput.text")
+                        root.accepted(textInput.text)
                     }
                 }
                 CustomButton {

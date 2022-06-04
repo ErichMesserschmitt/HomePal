@@ -15,15 +15,14 @@ ConnectionController::ConnectionController(QObject *parent) : QObject(parent)
 void ConnectionController::startServer()
 {
     m_server = new ServerTCP(1488, true, this);
-    connect(m_server, &IServer::receivedDataChanged, this, &ConnectionController::onDataReceived);
+    connect(m_server, &IServer::receivedData, this, &ConnectionController::onDataReceived);
     connect(this, &ConnectionController::dataProcessed, m_server, &IServer::sendData);
 }
 
-void ConnectionController::onDataReceived(QWebSocket* socket)
+void ConnectionController::onDataReceived(QJsonDocument doc, QWebSocket* socket)
 {
     qDebug() << "ConnectionController::onDataReceived :: signal emmited";
-    QJsonDocument receivedDoc = m_client->receiveData();
-    processData(receivedDoc, socket);
+    processData(doc, socket);
 }
 
 void ConnectionController::processData(QJsonDocument &doc, QWebSocket* socket)
@@ -33,32 +32,26 @@ void ConnectionController::processData(QJsonDocument &doc, QWebSocket* socket)
     switch(dataType){
     case ConnType::Init:
 
+    case ConnType::ComponentList:
+        return;
     case ConnType::CreateComponent:
-        addComponent(doc);
-        return;
     case ConnType::CreateRoom:
-        addRoom(doc);
-        return;
     case ConnType::EditRoom:
-        editRoom(doc);
-        return;
     case ConnType::EditComponent:
-        editComponent(doc);
+        qDebug() << "ConnectionController::processData :: nothing to do with this type of data on client side" << dataType;
         return;
     case ConnType::Journal:
-        sendJournal(socket);
         return;
     case ConnType::Disconnect:
-        disconnectClient(socket);
+        qDebug() << "ConnectionController::processData :: client preparing for disconnect";
+        if(socket){
+            socket->disconnect(this);
+        }
         return;
-    case ConnType::RoomList:
-        sendRooms(socket);
-        return;
-    case ConnType::ComponentList:
-        sendComponents(socket);
-        return;
+
     default:
         return;
+
     }
 }
 

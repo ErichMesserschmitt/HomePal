@@ -117,8 +117,7 @@ void ServerTCP::processBinaryMessage(QByteArray message)
     if (m_debug)
         qDebug() << "Binary Message received:" << message;
     if (pClient) {
-        setReceivedData(receivedDoc);
-        Q_EMIT(receivedDataChanged(pClient));
+        Q_EMIT(receivedData(receivedDoc, pClient));
     }
 }
 
