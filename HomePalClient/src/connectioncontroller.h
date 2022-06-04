@@ -12,7 +12,6 @@
 #include <QTimer>
 class RoomController;
 class ClientTCP;
-class EchoServer;
 
 class ConnectionController : public QObject {
     Q_OBJECT
@@ -23,6 +22,7 @@ public:
 
 public:
     Q_INVOKABLE void startClient();
+    Q_INVOKABLE void startClient(QString adress, int port = 1488);
     Q_INVOKABLE void stopClient();
 
     void requestComponent();
@@ -40,7 +40,6 @@ signals:
 private:
     void processData(QJsonDocument& doc);
     IClient* m_client;
-    EchoServer* m_server;
     QString m_defaultAdress = QStringLiteral("127.0.0.1");
     int m_defaultPort = 1488;
 };

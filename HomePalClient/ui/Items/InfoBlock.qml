@@ -14,7 +14,7 @@ Rectangle {
     property string status: "Disabled"
     property string enabledAt: "00:00 AM"
     property string disabledAt: "00:00 AM"
-    property string additionalInfo: "Currently no info\nsoon will be updated"
+    property var additionalInfo: []
 
     RowLayout {
         anchors.fill: parent;
@@ -51,8 +51,8 @@ Rectangle {
                     anchors.fill: parent;
                     anchors.margins: parent.height * 0.1
                     text: "Status: " + root.status + "<br>"
-                    + "Enable At: " + root.enabledAt + "<br>"
-                    + "Disable At: " + root.disabledAt
+                          + "Enable At: " + root.enabledAt + "<br>"
+                          + "Disable At: " + root.disabledAt
                     font.pointSize: parent.height * 0.1
                     color: Style.white
                     font.family: Style.fontMain.name
@@ -62,20 +62,61 @@ Rectangle {
                 }
             }
             Rectangle {
+                id: infoBlock
                 Layout.fillHeight: true;
                 Layout.fillWidth: true;
                 radius: Style.defaultRadius
                 color: Style.lightGrey
-                Text {
+                Flickable {
                     anchors.fill: parent;
-                    anchors.margins: parent.height * 0.1
-                    text: root.additionalInfo
-                    font.pointSize: parent.height * 0.1
-                    color: Style.black
-                    font.family: Style.fontMain.name
-                    horizontalAlignment: Qt.AlignLeft
-                    verticalAlignment: Qt.AlignVCenter
-                    wrapMode: Text.WordWrap
+                    readonly property int columnSpacing: 2
+
+                    readonly property int proposedHeight: infoBlock.height * 0.3
+                    readonly property int columns: root.additionalInfo.length
+
+
+                    contentHeight: columns * proposedHeight + (columns - 1) * columnSpacing
+                    contentWidth: width
+
+                    flickableDirection: Flickable.VerticalFlick
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    interactive: true
+
+                    ColumnLayout {
+                        anchors.fill: parent;
+                        anchors.margins: 5
+                        Layout.alignment: Qt.AlignTop
+                        spacing: 2
+                        Repeater{
+                            model: root.additionalInfo
+                            Rectangle {
+                                Layout.fillHeight: false;
+                                Layout.preferredHeight: infoBlock.height * 0.3
+                                Layout.fillWidth: true;
+                                color: Style.semiTransparent;
+                                radius: Style.defaultRadius
+                                Text {
+                                    Layout.fillHeight: false;
+                                    Layout.preferredHeight: infoBlock.height * 0.3
+                                    Layout.fillWidth: true;
+                                    text: root.additionalInfo[index]
+                                    font.pixelSize: parent.height * 0.3
+                                    leftPadding: 5
+                                    color: Style.black
+                                    font.family: Style.fontMain.name
+                                    horizontalAlignment: Qt.AlignLeft
+                                    verticalAlignment: Qt.AlignTop
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+                        Item {
+                            Layout.fillHeight: true;
+                            Layout.fillWidth: true;
+                        }
+                    }
                 }
             }
         }

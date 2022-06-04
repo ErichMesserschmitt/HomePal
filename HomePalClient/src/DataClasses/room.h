@@ -18,6 +18,8 @@ public:
     RoomGroup(QObject* parent = nullptr);
     RoomGroup(const RoomGroup& other):
         QObject(other.parent())
+      , m_index(other.m_index)
+      , m_name(other.m_name)
     {
     }
     RoomGroup& operator=(const RoomGroup& other){

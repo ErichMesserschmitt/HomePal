@@ -12,7 +12,7 @@ class RoomGroup;
 class RoomController : public QObject {
     Q_OBJECT
 public:
-    Q_PROPERTY(QList<Room*> rooms READ rooms NOTIFY roomsChanged)
+    Q_PROPERTY(QList<RoomGroup*> rooms READ rooms NOTIFY roomsChanged)
     Q_PROPERTY(int selectedRoom READ selectedRoom WRITE setSelectedRoom NOTIFY selectedRoomChanged)
 
 public:

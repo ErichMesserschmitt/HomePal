@@ -8,6 +8,8 @@
 #include <QQmlContext>
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QCommandLineOption>
+#include "DataClasses/component.h"
+#include "DataClasses/room.h"
 
 GUI_Controller::GUI_Controller(QObject *parent) : QObject(parent)
 {
@@ -19,6 +21,10 @@ GUI_Controller::GUI_Controller(QObject *parent) : QObject(parent)
     ctx->setContextProperty(QStringLiteral("_appController"), this);
     ctx->setContextProperty(QStringLiteral("_roomController"), m_roomController);
     ctx->setContextProperty(QStringLiteral("_connController"), m_connController);
+    qmlRegisterType<Component>("DataClasses", 1.0, 1.0, "Component");
+    qmlRegisterType<RoomGroup>("DataClasses", 1.0, 1.0, "RoomGroup");
+    qmlRegisterType<JournalPage>("DataClasses", 1.0, 1.0, "JournalPage");
+
     m_engine->addImportPath("qrc:/recources");
 
 

@@ -21,13 +21,14 @@ QJsonDocument Component::toDoc(Component &comp)
     component["highPoint"] = comp.highPoint();
     component["delta"] = comp.delta();
     component["isAuto"] = comp.isAuto();
+    component["enabled"] = comp.enabled();
     QJsonArray enableAtArray;
     QJsonArray disableAtArray;
     QJsonArray infoArray;
-    for(auto& p : comp.enableAt()){
+    for(auto& p : comp.enableAtQ()){
         enableAtArray.append(p.toString(Qt::DateFormat::TextDate));
     }
-    for(auto& p : comp.disableAt()){
+    for(auto& p : comp.disableAtQ()){
         disableAtArray.append(p.toString(Qt::DateFormat::TextDate));
     }
     for(auto& p : comp.info()){
@@ -51,6 +52,7 @@ Component Component::fromDoc(QJsonDocument &doc)
     component.setHighPoint(comp.value("highPoint").toDouble(0));
     component.setDelta(comp.value("delta").toDouble(0));
     component.setIsAuto(comp.value("isAuto").toBool(false));
+    component.setEnabled(comp.value("enabled").toBool());
     QJsonArray enableAtArray = comp.value("enableAt").toArray();
     QList<QDateTime> enableAtList;
     QJsonArray disableAtArray = comp.value("disableAt").toArray();
@@ -68,6 +70,22 @@ Component Component::fromDoc(QJsonDocument &doc)
     }
 
     return component;
+}
+
+QList<QString> Component::enableAt()
+{
+    QList<QString> list;
+    for(auto& time : m_enableAt){
+        list.append(time.toString());
+    }
+}
+
+QList<QString> Component::disableAt()
+{
+    QList<QString> list;
+    for(auto& time : m_disableAt){
+        list.append(time.toString());
+    }
 }
 
 void Component::setIndex(int index)
@@ -134,6 +152,12 @@ void Component::setIsAuto(bool v)
 {
     m_auto = v;
     Q_EMIT isAutoChanged();
+}
+
+void Component::setEnabled(bool v)
+{
+    m_enabled = v;
+    Q_EMIT enabledChanged();
 }
 
 

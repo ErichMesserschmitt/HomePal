@@ -17,20 +17,16 @@ class ConnectionController;
 struct JournalPage {
     JournalPage() {
     }
-    JournalPage(QList<RoomGroup> r, QList<Component> c, QString info = "") {
-        m_rooms = r;
-        m_components = c;
-        m_shortInfo = info;
-    }
-    QList<RoomGroup> m_rooms;
-    QList<Component> m_components;
+    QList<RoomGroup*> m_rooms;
+    QList<Component*> m_components;
     QString m_shortInfo = "";
 };
 
 class RoomController : public QObject {
     Q_OBJECT
 public:
-    Q_PROPERTY(QList<RoomGroup> rooms READ rooms NOTIFY roomsChanged)
+    Q_PROPERTY(QList<RoomGroup*> rooms READ rooms NOTIFY lastPageChanged)
+    Q_PROPERTY(QList<Component*> components READ components NOTIFY lastPageChanged)
     Q_PROPERTY(int selectedRoom READ selectedRoom WRITE setSelectedRoom NOTIFY selectedRoomChanged)
     Q_PROPERTY(QList<Component> pendingComponents READ pendingComponents NOTIFY pendingComponentsChanged)
 
@@ -46,13 +42,19 @@ public:
     Q_INVOKABLE void selectComponent(QString customName, int index, int roomIndex);
 
 
-    QList<RoomGroup> rooms() {return m_lastPage.m_rooms;}
+    QList<RoomGroup*> rooms() {
+        return m_lastPage.m_rooms;
+    }
+    QList<Component*> components() {
+        return m_lastPage.m_components;
+    }
+
     QList<Component> pendingComponents() {return m_pendingComponents;}
 
 signals:
-    void roomsChanged();
     void selectedRoomChanged();
     void pendingComponentsChanged();
+    void lastPageChanged();
 
 public slots:
     void onJournalReceived(QJsonDocument& doc);

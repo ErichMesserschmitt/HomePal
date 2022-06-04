@@ -58,11 +58,52 @@ Item {
             }
         }
         RowLayout {
+            id: roomsRow
             Layout.fillHeight: false;
             Layout.preferredHeight: root.height * 0.1
             Layout.fillWidth: true;
+            property bool selectorVisible: _roomController ? _roomController.rooms < 3 : true && roomList.length > 0
+            property var roomList: _roomController ? _roomController.rooms : []
+            property int selected: 0;
+
+            CustomButton {
+                id: leftRoom
+                Layout.fillHeight: true;
+                Layout.fillWidth: false;
+                Layout.preferredWidth: height
+                visible: !roomsRow.selectorVisible
+                text: "<"
+                onClicked: {
+                    roomsRow.selected = roomsRow.selected > 0 ? roomsRow.selected - 1 : roomsRow.roomList.length - 1
+                    _roomController.selectedRoom = _roomController.rooms[roomsRow.selected].index
+                }
+            }
+
+            CustomButton {
+                id: currentRoom
+                Layout.fillHeight: true;
+                Layout.fillWidth: true;
+                Layout.preferredWidth: height
+                visible: !roomsRow.selectorVisible
+                enabled: false;
+                text: roomsRow.roomList[roomsRow.selected].name
+            }
+
+            CustomButton {
+                id: rightRoom
+                Layout.fillHeight: true;
+                Layout.fillWidth: false;
+                Layout.preferredWidth: height
+                text: ">"
+                visible: !roomsRow.selectorVisible
+                onClicked: {
+                    roomsRow.selected = roomsRow.selected < roomsRow.roomList.length - 1 ? roomsRow.selected + 1 : 0
+                    _roomController.selectedRoom = _roomController.rooms[roomsRow.selected].index
+                }
+            }
+
             Repeater {
-                model:  _roomController ? _roomController.rooms : 0
+                model: roomsRow.selectorVisible ? _roomController ? _roomController.rooms : 0 : 0
                 CustomButton {
                     Layout.fillHeight: true;
                     Layout.fillWidth: true;
@@ -72,7 +113,7 @@ Item {
                     borderColor: roomSelected ? Style.darkOrange : Style.semiTransparentGrey
                     text: _roomController.rooms[index].name
                     onClicked: {
-                        _roomController.selectedRoom = index
+                        _roomController.selectedRoom = _roomController.rooms[index].index
                     }
                 }
             }
@@ -82,58 +123,90 @@ Item {
                 Layout.fillWidth: false;
                 Layout.preferredWidth: height
                 text: "+"
+                color: Style.semiTransparent
+                borderColor: Style.white
+                textColor: Style.white
+                fontSize: height * 0.4
+                radius: Style.defaultRadius
                 onClicked: {
-                    _roomController.addRoom("Test room");
+                    //_roomController.addRoom("Test room");
+                    console.log("_roomController.components", _roomController.components.length)
                     editRoomNamePopup.open()
                 }
             }
         }
-
-        GridLayout {
-            id: modulesGrid
+        Flickable {
+            id: flickableZone
             Layout.fillHeight: true;
             Layout.fillWidth: true;
-            readonly property int contentWidth: root.currentWidth - (root.currentWidth * 0.02 * 2)
-            rows: blockRepeater.model / columns
-            columns: contentWidth / root.minSize
-            columnSpacing: 2
 
-            Repeater {
-                id: blockRepeater
-                model: 0//_roomController ? _roomController.rooms : 0
-                InfoBlock {
+            readonly property int columnSpacing: 2
+            readonly property int proposedWidth: root.currentWidth - (root.currentWidth * 0.02 * 2)
+            readonly property int proposedHeight: Math.max(proposedWidth * 0.25 - (columnSpacing * 3), root.minSize)
+            readonly property int columns: proposedWidth / root.minSize
+            readonly property int itemsCount: (_roomController ? _roomController.components.length : 0) + 1
+            readonly property int proposedRows: itemsCount / columns
+            readonly property int rows: proposedRows * columns < itemsCount ? proposedRows + 1 : proposedRows
+
+
+            contentHeight: proposedHeight * rows + (rows - 1) * columnSpacing
+            contentWidth: width
+
+            flickableDirection: Flickable.VerticalFlick
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+
+            interactive: true
+
+            GridLayout {
+                id: modulesGrid
+                anchors.fill: parent
+                rows: flickableZone.rows
+                columns: flickableZone.columns
+                columnSpacing: 2
+
+                Repeater {
+                    id: blockRepeater
+                    model: _roomController ? _roomController.components : 0
+                    InfoBlock {
+                        Layout.fillHeight: true;
+                        Layout.maximumHeight: flickableZone.proposedHeight
+                        Layout.minimumHeight: root.minSize
+                        Layout.minimumWidth: root.minSize
+                        Layout.fillWidth: true;
+                        Layout.preferredWidth: height
+                        visible: _roomController ? _roomController.selectedRoom === _roomController.components[index].roomIndex : false
+                        readonly property var locale: Qt.locale()
+
+                        name: _roomController.components[index].name
+                        status: _roomController.components[index].enabled ? "Enabled" : "Disabled"
+                        property date enDate: _roomController.components[index].nearestEnable
+                        property date disDate: _roomController.components[index].nearestDisable
+
+                        enabledAt: enDate.toTimeString();
+                        disabledAt: disDate.toTimeString();
+                        additionalInfo: _roomController.components[index].info
+                    }
+                }
+                CustomButton {
                     Layout.fillHeight: true;
-                    Layout.maximumHeight: Math.max(modulesGrid.contentWidth * 0.25 - (modulesGrid.columnSpacing * 3), root.minSize)
+                    Layout.maximumHeight: flickableZone.proposedHeight
                     Layout.minimumHeight: root.minSize
                     Layout.minimumWidth: root.minSize
                     Layout.fillWidth: true;
                     Layout.preferredWidth: height
-                    name: ""//_roomController.rooms[index].name
-                }
-            }
-            CustomButton {
-                Layout.fillHeight: true;
-                Layout.maximumHeight: Math.max(modulesGrid.contentWidth * 0.25 - (modulesGrid.columnSpacing * 3), root.minSize)
-                Layout.minimumHeight: root.minSize
-                Layout.minimumWidth: root.minSize
-                Layout.fillWidth: true;
-                Layout.preferredWidth: height
-                text: "+"
-                color: Style.semiTransparent
-                borderColor: Style.semiTransparentGrey
-                textColor: Style.white
-                radius: Style.defaultRadius
-                onClicked: {
-                    console.log("adding component")
+                    text: "+"
+                    color: Style.semiTransparent
+                    borderColor: Style.white
+                    textColor: Style.white
+                    fontSize: height * 0.4
+                    radius: Style.defaultRadius
+                    onClicked: {
+                        console.log("adding component")
+                    }
                 }
             }
         }
-
-        Item {
-            Layout.fillHeight: true;
-            Layout.fillWidth: true;
-        }
-
         RowLayout {
             Layout.fillHeight: false;
             Layout.preferredHeight: root.height * 0.1

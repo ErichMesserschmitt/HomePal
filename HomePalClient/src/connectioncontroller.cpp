@@ -13,6 +13,15 @@ void ConnectionController::startClient()
 {
     m_client = new ClientTCP(QStringLiteral("ws://") + m_defaultAdress + ":" + QString::number(m_defaultPort));
     connect(m_client, &IClient::receivedDataChanged, this, &ConnectionController::onDataReceived);
+    m_defaultAdress = "127.0.0.1";
+    m_defaultPort = 1488;
+}
+
+void ConnectionController::startClient(QString adress, int port)
+{
+    m_defaultAdress = adress;
+    m_defaultPort = port;
+    startClient();
 }
 
 void ConnectionController::stopClient()
@@ -33,6 +42,7 @@ void ConnectionController::onDataReceived()
 {
     qDebug() << "ConnectionController::onDataReceived :: signal emmited";
     QJsonDocument receivedDoc = m_client->receiveData();
+    processData(receivedDoc);
 }
 
 void ConnectionController::processData(QJsonDocument &doc)
