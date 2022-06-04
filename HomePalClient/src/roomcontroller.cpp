@@ -56,6 +56,22 @@ void RoomController::selectComponent(QString customName, int index, int roomInde
 }
 
 
+
+int RoomController::roomComponentsCount()
+{
+    if(m_selectedRoom == 0){
+        return m_lastPage.m_components.length();
+    }
+    int c = 0;
+    for(auto& cmp : m_lastPage.m_components){
+        if(cmp->roomIndex() == m_selectedRoom){
+            ++c;
+        }
+    }
+    return c;
+}
+
+
 void RoomController::onJournalReceived(QJsonDocument &doc)
 {
     qDebug() << "RoomController::onJournalReceived :: received last journal page";
@@ -119,12 +135,12 @@ void RoomController::testRooms()
 {
     for(int i =0; i<5; ++i){
         RoomGroup room;
-        room.setIndex(i + 1);
-        QString name = "Room N" + QString::number(i + 1);
+        room.setIndex(i);
+        QString name = i == 0 ? "Home" : "Room N" + QString::number(i);
         room.setName(name);
         m_lastPage.m_rooms.push_back(new RoomGroup(room));
     }
-    for(int i =0; i<3; ++i){
+    for(int i =0; i<8; ++i){
         Component c;
         QString name = "Component " + QString::number(i + 1);
         c.setName(name);
@@ -134,7 +150,7 @@ void RoomController::testRooms()
         c.setLowPoint(-1.0);
         c.setHighPoint(1.0);
         QList<QString> infoList;
-        for(int k=0; k<4; ++k){
+        for(int k=0; k<5; ++k){
             infoList.append("test info " + QString::number(k+1));
         }
         c.setInfo(infoList);

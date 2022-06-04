@@ -29,6 +29,7 @@ public:
     Q_PROPERTY(QList<Component*> components READ components NOTIFY lastPageChanged)
     Q_PROPERTY(int selectedRoom READ selectedRoom WRITE setSelectedRoom NOTIFY selectedRoomChanged)
     Q_PROPERTY(QList<Component> pendingComponents READ pendingComponents NOTIFY pendingComponentsChanged)
+    Q_PROPERTY(int roomComponentsCount READ roomComponentsCount NOTIFY selectedRoomChanged)
 
 public:
     explicit RoomController(ConnectionController* connController, QObject* parent = nullptr);
@@ -40,6 +41,7 @@ public:
     Q_INVOKABLE void addRoom(QString name);
     Q_INVOKABLE void requestNewDevices();
     Q_INVOKABLE void selectComponent(QString customName, int index, int roomIndex);
+    int roomComponentsCount();
 
 
     QList<RoomGroup*> rooms() {

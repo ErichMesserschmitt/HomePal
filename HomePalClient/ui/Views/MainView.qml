@@ -144,7 +144,7 @@ Item {
             readonly property int proposedWidth: root.currentWidth - (root.currentWidth * 0.02 * 2)
             readonly property int proposedHeight: Math.max(proposedWidth * 0.25 - (columnSpacing * 3), root.minSize)
             readonly property int columns: proposedWidth / root.minSize
-            readonly property int itemsCount: (_roomController ? _roomController.components.length : 0) + 1
+            readonly property int itemsCount: (_roomController ? _roomController.roomComponentsCount : 0) + 1
             readonly property int proposedRows: itemsCount / columns
             readonly property int rows: proposedRows * columns < itemsCount ? proposedRows + 1 : proposedRows
 
@@ -174,8 +174,9 @@ Item {
                         Layout.minimumHeight: root.minSize
                         Layout.minimumWidth: root.minSize
                         Layout.fillWidth: true;
+                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                         Layout.preferredWidth: height
-                        visible: _roomController ? _roomController.selectedRoom === _roomController.components[index].roomIndex : false
+                        visible: _roomController ? _roomController.selectedRoom === 0 ? true : _roomController.selectedRoom === _roomController.components[index].roomIndex : false
                         readonly property var locale: Qt.locale()
 
                         name: _roomController.components[index].name
@@ -195,6 +196,7 @@ Item {
                     Layout.minimumWidth: root.minSize
                     Layout.fillWidth: true;
                     Layout.preferredWidth: height
+                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                     text: "+"
                     color: Style.semiTransparent
                     borderColor: Style.white
