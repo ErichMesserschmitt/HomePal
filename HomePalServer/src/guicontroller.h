@@ -7,7 +7,7 @@
 #include <QQmlApplicationEngine>
 #include <QTimer>
 class RoomController;
-class ConnectionController;
+class ProcessController;
 
 
 class GUI_Controller : public QObject {
@@ -34,5 +34,5 @@ private:
     QTimer m_initStartTimer;
     QQmlApplicationEngine *m_engine;
     RoomController *m_roomController;
-    ConnectionController *m_connController;
+    ProcessController *m_connController;
 };

@@ -99,7 +99,7 @@ void RoomController::onFullJournalReceived(QJsonDocument &doc)
     qDebug() << "RoomController::onFullJournalReceived :: received full journal";
     JournalPage p;
     QJsonObject d = doc.object();
-    QJsonArray pageArray = d.value("pages").toArray();
+    QJsonArray pageArray = d.value("list").toArray();
     m_fullJournal.clear();
     for(auto page : pageArray){
         QJsonArray roomArr = page.toObject().value("rooms").toArray();

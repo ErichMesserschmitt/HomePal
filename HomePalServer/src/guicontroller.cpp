@@ -13,7 +13,7 @@ GUI_Controller::GUI_Controller(QObject *parent) : QObject(parent)
 {
     m_engine = new QQmlApplicationEngine(parent);
     m_roomController = new RoomController(this);
-    m_connController = new ConnectionController(this);
+    m_connController = new ProcessController(this);
 
     QQmlContext *ctx = m_engine->rootContext();
     ctx->setContextProperty(QStringLiteral("_appController"), this);

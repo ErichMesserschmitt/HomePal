@@ -39,7 +39,6 @@ public:
     }
     ~IServer() override = default;
 
-    virtual QJsonDocument& receiveData() = 0;
     virtual int sendData(QJsonDocument& data) = 0;
     virtual void disconnectClient(QWebSocket* socket) = 0;
 
@@ -49,8 +48,6 @@ public slots:
     void socketDisconnected() {qDebug() << "Socket disconnected";};
 
 protected:
-    virtual void setReceivedData(QJsonDocument& doc) = 0;
-    QJsonDocument m_receivedData;
     int m_passcode;
     QUrl m_url;
     bool m_debug;
