@@ -19,12 +19,20 @@ void ProcessController::startServer()
     connect(this, &ProcessController::dataProcessed, m_server, &IServer::sendData);
     m_lastPageUpdater = new QTimer(this);
     m_lastPageUpdater->setInterval(60000);
-    m_journalUpdater = new QTimer();
+    m_journalUpdater = new QTimer(this);
     m_journalUpdater->setInterval(1800000);
     connect(m_lastPageUpdater, &QTimer::timeout, this, &ProcessController::updateLastPage);
     connect(m_journalUpdater, &QTimer::timeout, this, &ProcessController::updateJournal);
+
+    test();
+
     updateLastPage();
     updateJournal();
+    m_lastPageUpdater->setSingleShot(false);
+    m_lastPageUpdater->start(6000);
+    m_journalUpdater->setSingleShot(false);
+    m_journalUpdater->start(1800000);
+
 }
 
 void ProcessController::onDataReceived(QJsonDocument doc, QWebSocket* socket)
@@ -39,8 +47,10 @@ void ProcessController::processData(QJsonDocument &doc, QWebSocket* socket)
     ConnType dataType = static_cast<ConnType>(received.value("type").toInt());
     switch(dataType){
     case ConnType::Init:
+        updateJournal();
+        updateLastPage();
         return;
-    case ConnType::ComponentList:
+    case ConnType::RequestComponents:
         sendComponents(socket);
         return;
     case ConnType::CreateComponent:
@@ -58,8 +68,14 @@ void ProcessController::processData(QJsonDocument &doc, QWebSocket* socket)
     case ConnType::Journal:
         sendJournal(socket);
         return;
+    case ConnType::DeleteComponent:
+        deleteComponent(doc);
+        return;
+    case ConnType::DeleteRoom:
+        deleteRoom(doc);
+        return;
     case ConnType::LastPage:
-        sendLastPage(socket);
+        sendLastPage();
         return;
     case ConnType::Disconnect:
         qDebug() << "ConnectionController::processData :: client preparing for disconnect";
@@ -87,24 +103,41 @@ void ProcessController::processInitialization(QJsonDocument &data, QWebSocket *s
 void ProcessController::addComponent(QJsonDocument& data)
 {
     Component comp = Component::fromDoc(data);
+    QList<Component> newList;
     for(auto& c : m_pendingComponents){
         if(c.index() == comp.index()){
-            auto copy = c;
-            c = comp;
-            c.setType(copy.type());
-            c.setLowPoint(copy.lowPoint());
-            c.setHighPoint(copy.highPoint());
-            c.setDelta(copy.delta());
-
-            //updateJournal();
+            Component prepared(c);
+            prepared.setRoomIndex(comp.roomIndex());
+            m_connectedComponents.push_back(prepared);
+        } else {
+            newList.push_back(c);
         }
     }
+    m_pendingComponents = newList;
+    updateLastPage();
 }
 
 void ProcessController::addRoom(QJsonDocument& data)
 {
     RoomGroup room = RoomGroup::fromDoc(data);
+    int newIndex = 1;
+    bool possible = true;
+    while(true){
+        for(auto& r : m_rooms){
+            if(newIndex == r.index()){
+                possible = false;
+                break;
+            }
+        }
+        if(possible){
+            break;
+        }
+        possible = true;
+        ++newIndex;
+    }
+    room.setIndex(newIndex);
     m_rooms.append(room);
+    updateLastPage();
 }
 
 void ProcessController::editComponent(QJsonDocument& data)
@@ -113,12 +146,13 @@ void ProcessController::editComponent(QJsonDocument& data)
     for(auto& c : m_connectedComponents){
         if(c.index() == comp.index()){
             auto copy = c;
-            c = comp;
+            c.setIsAuto(comp.isAuto());
+            c.setEnabled(comp.enabled());
             c.setType(copy.type());
             c.setLowPoint(copy.lowPoint());
             c.setHighPoint(copy.highPoint());
             c.setDelta(copy.delta());
-            //updateJournal();
+            updateLastPage();
         }
     }
 }
@@ -128,10 +162,45 @@ void ProcessController::editRoom(QJsonDocument& data)
     RoomGroup room = RoomGroup::fromDoc(data);
     for(auto& r : m_rooms) {
         if(r.index() == room.index()){
-            r.name() = room.name();
+            QString name = room.name();
+            r.setName(name);
         }
     }
-    //updateJournal();
+    updateLastPage();
+}
+
+void ProcessController::deleteComponent(QJsonDocument &data)
+{
+    Component comp = Component::fromDoc(data);
+    QList<Component> newList;
+    for(auto& r : m_connectedComponents) {
+        if(r.index() != comp.index()){
+            newList.append(r);
+        }
+    }
+    m_connectedComponents = newList;
+    m_pendingComponents.append(comp);
+    updateLastPage();
+}
+
+void ProcessController::deleteRoom(QJsonDocument &data)
+{
+    RoomGroup room = RoomGroup::fromDoc(data);
+    QList<RoomGroup> newList;
+
+    for(auto& r : m_rooms) {
+        if(r.index() != room.index()){
+            newList.append(r);
+        }
+    }
+    m_rooms = newList;
+
+    for(auto& c : m_connectedComponents){
+        if(c.roomIndex() == room.index()){
+            c.setRoomIndex(0);
+        }
+    }
+    updateLastPage();
 }
 
 void ProcessController::sendJournal(QWebSocket* socket)
@@ -149,7 +218,7 @@ void ProcessController::sendJournal(QWebSocket* socket)
         }
         QJsonArray compArr;
         for(auto &comp : page.m_components){
-            roomArr.append(Component::toDoc(*comp).object());
+            compArr.append(Component::toDoc(*comp).object());
         }
         QJsonArray infoArr;
         for(auto &inf : page.m_shortInfo){
@@ -162,10 +231,10 @@ void ProcessController::sendJournal(QWebSocket* socket)
     }
     objToSend["list"] = pageArray;
     QJsonDocument doc = QJsonDocument(objToSend);
-    Q_EMIT dataProcessed(doc, socket);
+    Q_EMIT dataProcessed(doc);
 }
 
-void ProcessController::sendLastPage(QWebSocket *socket)
+void ProcessController::sendLastPage()
 {
     QJsonObject pageObj;
     pageObj["type"] = ConnType::LastPage;
@@ -175,7 +244,7 @@ void ProcessController::sendLastPage(QWebSocket *socket)
     }
     QJsonArray compArr;
     for(auto &comp : m_lastPage.m_components){
-        roomArr.append(Component::toDoc(*comp).object());
+        compArr.append(Component::toDoc(*comp).object());
     }
     QJsonArray infoArr;
     for(auto &inf : m_lastPage.m_shortInfo){
@@ -185,7 +254,7 @@ void ProcessController::sendLastPage(QWebSocket *socket)
     pageObj["components"] = compArr;
     pageObj["info"] = infoArr;
     QJsonDocument doc = QJsonDocument(pageObj);
-    Q_EMIT dataProcessed(doc, socket);
+    Q_EMIT dataProcessed(doc);
 }
 
 
@@ -207,27 +276,81 @@ void ProcessController::updateJournal()
 {
     JournalPage page;
     for(auto& c:m_connectedComponents){
-        page.m_components.emplaceBack(c);
+        page.m_components.push_back(new Component(c));
     }
     for(auto& c:m_rooms){
-        page.m_rooms.emplaceBack(c);
+        page.m_rooms.push_back(new RoomGroup(c));
     }
     QString info = "Time " + QDateTime::currentDateTime().toString(Qt::DateFormat::TextDate) + ". Generated at simulation";
     page.m_shortInfo = info;
 
     m_fullJournal.append(page);
+    sendJournal();
 }
 
 void ProcessController::updateLastPage()
 {
     JournalPage page;
     for(auto& c:m_connectedComponents){
-        page.m_components.emplaceBack(c);
+        page.m_components.push_back(new Component(c));
     }
     for(auto& c:m_rooms){
-        page.m_rooms.emplaceBack(c);
+        page.m_rooms.push_back(new RoomGroup(c));
     }
     QString info = "Time " + QDateTime::currentDateTime().toString(Qt::DateFormat::TextDate) + ". Generated at simulation";
     page.m_shortInfo = info;
     m_lastPage = page;
+    sendLastPage();
+}
+
+void ProcessController::test()
+{
+    QList<QString> names = {"Hoover 200 Cleaner", "Thermometerc C", "LG Air Conditioner", "SecuroServ", "Lamp", "Lamp", "Siemens Water Heater"};
+    QList<float> low =     {0, 0, -15, 0, 0, 0, 15};
+    QList<float> high =    {1, 1, 25, 1, 10, 10, 60};
+    QList<float> delta =   {1, 1, 1,  1, 0.5, 0.5, 1};
+    QList<ComponentType> type {ComponentType::Switcher, ComponentType::Switcher, ComponentType::Slider, ComponentType::Switcher, ComponentType::Slider, ComponentType::Slider, ComponentType::Slider};
+
+
+    RoomGroup room;
+    room.setIndex(0);
+    QString name = "All Components";
+    room.setName(name);
+    m_rooms.push_back(room);
+
+    for(int i =0; i<names.length(); ++i){
+        Component c;
+        QString name = names[i];
+        c.setName(name);
+        c.setIndex(i + 1);
+        c.setRoomIndex(0);
+        c.setDelta(delta[i]);
+        c.setLowPoint(low[i]);
+        c.setHighPoint(high[i]);
+        QList<QString> infoList;
+        c.setInfo(infoList);
+        QDateTime enableDate(QDate::currentDate(), QTime(1, 22, 0, 0));
+        QDateTime disableDate(QDate::currentDate(), QTime(5, 22, 0, 0));
+        c.setEnableAt({});
+        c.setDisableAt({});
+        c.setType(type[i]);
+        c.setIsAuto(false);
+        c.setEnabled(false);
+        m_pendingComponents.append(c);
+    }
+}
+
+void ProcessController::simulateSomeResults()
+{
+    for(auto& c : m_connectedComponents) {
+        switch(c.type()){
+        case ComponentType::Switcher:
+
+            return;
+        case ComponentType::Slider:
+            return;
+        default:
+        return;
+        }
+    }
 }

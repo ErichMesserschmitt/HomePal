@@ -7,6 +7,7 @@
 ConnectionController::ConnectionController(QObject *parent) : QObject(parent)
 {
     qDebug() << "ConnectionController::ConnectionController is initialized";
+    startClient();
 }
 
 void ConnectionController::startClient()
@@ -48,7 +49,7 @@ void ConnectionController::onDataReceived()
 void ConnectionController::processData(QJsonDocument &doc)
 {
     QJsonObject received = doc.object();
-    ConnType dataType = static_cast<ConnType>(received.value("Type").toInt());
+    ConnType dataType = static_cast<ConnType>(received.value("type").toInt());
     switch(dataType){
     case ConnType::Init:
 
@@ -63,6 +64,9 @@ void ConnectionController::processData(QJsonDocument &doc)
         return;
     case ConnType::Journal:
         Q_EMIT journalReceived(doc);
+        return;
+    case ConnType::LastPage:
+        Q_EMIT lastPageReceived(doc);
         return;
     case ConnType::Disconnect:
         qDebug() << "ConnectionController::processData :: client preparing for disconnect";

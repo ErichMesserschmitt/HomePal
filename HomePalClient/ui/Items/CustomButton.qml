@@ -55,7 +55,7 @@ AbstractButton {
                 text: root.text
                 visible: root.text.length > 0
 
-                font.pointSize: root.fontSize
+                font.pixelSize: root.fontSize
                 font.family: root.fontFamily
                 wrapMode: Text.WordWrap
                 rotation: root.isHorizontal ? 0 : -90

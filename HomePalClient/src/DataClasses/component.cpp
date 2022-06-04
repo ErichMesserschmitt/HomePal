@@ -11,6 +11,16 @@ Component::Component(QObject *parent) : QObject(parent)
 
 }
 
+void Component::switchEnabled()
+{
+    setEnabled(!m_enabled);
+}
+
+void Component::switchAuto()
+{
+    setIsAuto(!m_auto);
+}
+
 QJsonDocument Component::toDoc(Component &comp)
 {
     QJsonObject component;
@@ -22,6 +32,7 @@ QJsonDocument Component::toDoc(Component &comp)
     component["delta"] = comp.delta();
     component["isAuto"] = comp.isAuto();
     component["enabled"] = comp.enabled();
+    component["index"] = comp.index();
     QJsonArray enableAtArray;
     QJsonArray disableAtArray;
     QJsonArray infoArray;
@@ -48,11 +59,13 @@ Component Component::fromDoc(QJsonDocument &doc)
     QString name = comp.value("name").toString();
     component.setName(name);
     component.setRoomIndex(comp.value("roomIndex").toInt(0));
+    component.setIndex(comp.value("index").toInt());
     component.setLowPoint(comp.value("lowPoint").toDouble(0));
     component.setHighPoint(comp.value("highPoint").toDouble(0));
     component.setDelta(comp.value("delta").toDouble(0));
     component.setIsAuto(comp.value("isAuto").toBool(false));
     component.setEnabled(comp.value("enabled").toBool());
+    component.setIndex(comp.value("index").toInt());
     QJsonArray enableAtArray = comp.value("enableAt").toArray();
     QList<QDateTime> enableAtList;
     QJsonArray disableAtArray = comp.value("disableAt").toArray();
@@ -68,6 +81,9 @@ Component Component::fromDoc(QJsonDocument &doc)
     for(auto a : infoArray) {
         infoList.append(a.toString());
     }
+    component.m_enableAt = enableAtList;
+    component.m_disableAt = disableAtList;
+    component.m_info = infoList;
 
     return component;
 }
@@ -156,8 +172,12 @@ void Component::setIsAuto(bool v)
 
 void Component::setEnabled(bool v)
 {
-    m_enabled = v;
-    Q_EMIT enabledChanged();
+    if(m_enabled != v){
+        m_enabled = v;
+        QString infoString = (m_enabled ? "Enabled at " : "Disabled at ");
+        m_info.push_front(infoString + QTime::currentTime().toString());
+        Q_EMIT enabledChanged();
+    }
 }
 
 

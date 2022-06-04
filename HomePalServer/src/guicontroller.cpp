@@ -1,6 +1,5 @@
 #include "guicontroller.h"
-#include "roomcontroller.h"
-#include "connectioncontroller.h"
+#include "processcontroller.h"
 #include <QDebug>
 #include <QGuiApplication>
 #include <QDebug>
@@ -12,12 +11,10 @@
 GUI_Controller::GUI_Controller(QObject *parent) : QObject(parent)
 {
     m_engine = new QQmlApplicationEngine(parent);
-    m_roomController = new RoomController(this);
     m_connController = new ProcessController(this);
 
     QQmlContext *ctx = m_engine->rootContext();
     ctx->setContextProperty(QStringLiteral("_appController"), this);
-    ctx->setContextProperty(QStringLiteral("_roomController"), m_roomController);
     ctx->setContextProperty(QStringLiteral("_connController"), m_connController);
     m_engine->addImportPath("qrc:/qml");
 

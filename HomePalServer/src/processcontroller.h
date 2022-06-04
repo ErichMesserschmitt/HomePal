@@ -48,9 +48,11 @@ private:
     void addRoom(QJsonDocument& data);
     void editComponent(QJsonDocument& data);
     void editRoom(QJsonDocument& data);
+    void deleteComponent(QJsonDocument& data);
+    void deleteRoom(QJsonDocument& data);
 
-    void sendJournal(QWebSocket* socket);
-    void sendLastPage(QWebSocket* socket);
+    void sendJournal(QWebSocket* socket = nullptr);
+    void sendLastPage();
     void sendComponents(QWebSocket* socket);
 private slots:
     void updateJournal();
@@ -62,6 +64,9 @@ private:
     QList<Component> m_pendingComponents;
     QList<Component> m_connectedComponents;
     QList<RoomGroup> m_rooms;
+
+    void test();
+    void simulateSomeResults();
 
     IServer* m_server;
     QString m_defaultAdress = QStringLiteral("127.0.0.1");

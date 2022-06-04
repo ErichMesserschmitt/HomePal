@@ -11,7 +11,7 @@ RoomController::RoomController(ConnectionController *connController, QObject *pa
     QObject(parent),
     m_connController(connController)
 {
-    testRooms();
+   // testRooms();
 }
 
 void RoomController::setSelectedRoom(int roomIndex)
@@ -36,23 +36,23 @@ void RoomController::requestNewDevices()
 
 void RoomController::selectComponent(QString customName, int index, int roomIndex)
 {
-    Component comp;
+    Component* comp;
     for(auto c : m_pendingComponents){
-        if(c.index() == index){
-            comp = c;
+        if(c->index() == index){
+            comp = new Component(c);
             break;
         }
     }
-    if(comp.index() != index){
+    if(comp->index() != index){
         return;
     }
     if(!customName.isEmpty()){
-        comp.setName(customName);
+        comp->setName(customName);
     }
     if(roomIndex > 0) {
-        comp.setRoomIndex(roomIndex);
+        comp->setRoomIndex(roomIndex);
     }
-    m_connController->addComponent(comp);
+    m_connController->addComponent(*comp);
 }
 
 
@@ -69,6 +69,67 @@ int RoomController::roomComponentsCount()
         }
     }
     return c;
+}
+
+void RoomController::editRoom(int index)
+{
+    RoomGroup* room;
+    for(auto& r : m_lastPage.m_rooms){
+        if(r->index() == index){
+            room = new RoomGroup(*r);
+        }
+    }
+    m_editableRoom = new RoomGroup(*room);
+    Q_EMIT editableRoomChanged();
+}
+
+void RoomController::editComponent(int index)
+{
+    Component* component;
+    for(auto& r : m_lastPage.m_components){
+        if(r->index() == index){
+            component = new Component(*r);
+            break;
+        }
+    }
+    m_editableComponent = new Component(*component);
+    Q_EMIT editableComponentChanged();
+}
+
+void RoomController::saveEditRoom()
+{
+    if(m_editableRoom != nullptr){
+        m_connController->editRoom(*m_editableRoom);
+    }
+}
+
+void RoomController::saveEditComponent()
+{
+    if(m_editableComponent != nullptr){
+        m_connController->editComponent(*m_editableComponent);
+    }
+}
+
+void RoomController::removeRoom(int index)
+{
+    RoomGroup* room;
+    for(auto& r : m_lastPage.m_rooms){
+        if(r->index() == index){
+            room = new RoomGroup(*r);
+        }
+    }
+    m_connController->deleteRoom(*room);
+}
+
+void RoomController::removeComponent(int index)
+{
+    Component* component;
+    for(auto& r : m_lastPage.m_components){
+        if(r->index() == index){
+            component = new Component(r);
+        }
+    }
+    m_connController->deleteComponent(*component);
 }
 
 
@@ -92,6 +153,7 @@ void RoomController::onJournalReceived(QJsonDocument &doc)
         m_lastPage.m_components.push_back(new Component(Component::fromDoc(room)));
     }
     m_lastPage.m_shortInfo = d.value("info").toString();
+    Q_EMIT lastPageChanged();
 }
 
 void RoomController::onFullJournalReceived(QJsonDocument &doc)
@@ -122,11 +184,12 @@ void RoomController::onFullJournalReceived(QJsonDocument &doc)
 void RoomController::onComponentsListReceived(QJsonDocument &doc)
 {
     QJsonObject d = doc.object();
-    QJsonArray compArray = d.value("components").toArray();
+    QJsonArray compArray = d.value("list").toArray();
+    qDeleteAll(m_pendingComponents);
     m_pendingComponents.clear();
     for(auto comp : compArray){
         QJsonDocument tdoc(comp.toObject());
-        m_pendingComponents.push_back(Component::fromDoc(tdoc));
+        m_pendingComponents.push_back(new Component(Component::fromDoc(tdoc)));
     }
     Q_EMIT pendingComponentsChanged();
 }

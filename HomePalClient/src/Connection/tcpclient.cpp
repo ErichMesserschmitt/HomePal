@@ -61,6 +61,7 @@ ClientTCP::~ClientTCP()
 
 ClientTCP::ClientTCP(const QUrl &url, bool debug, QObject *parent) : IClient(url, debug, parent)
 {
+    m_debug = false;
     if (m_debug)
         qDebug() << "WebSocket server:" << url;
     connect(&m_webSocket, &QWebSocket::connected, this, &ClientTCP::onConnected);

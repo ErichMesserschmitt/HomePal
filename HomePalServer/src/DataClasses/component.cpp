@@ -22,6 +22,7 @@ QJsonDocument Component::toDoc(Component &comp)
     component["delta"] = comp.delta();
     component["isAuto"] = comp.isAuto();
     component["enabled"] = comp.enabled();
+    component["index"] = comp.index();
     QJsonArray enableAtArray;
     QJsonArray disableAtArray;
     QJsonArray infoArray;
@@ -53,6 +54,7 @@ Component Component::fromDoc(QJsonDocument &doc)
     component.setDelta(comp.value("delta").toDouble(0));
     component.setIsAuto(comp.value("isAuto").toBool(false));
     component.setEnabled(comp.value("enabled").toBool());
+    component.setIndex(comp.value("index").toInt());
     QJsonArray enableAtArray = comp.value("enableAt").toArray();
     QList<QDateTime> enableAtList;
     QJsonArray disableAtArray = comp.value("disableAt").toArray();
@@ -156,8 +158,12 @@ void Component::setIsAuto(bool v)
 
 void Component::setEnabled(bool v)
 {
-    m_enabled = v;
-    Q_EMIT enabledChanged();
+    if(m_enabled != v){
+        m_enabled = v;
+        QString infoString = (m_enabled ? "Enabled at " : "Disabled at ");
+        m_info.push_front(infoString + QTime::currentTime().toString());
+        Q_EMIT enabledChanged();
+    }
 }
 
 

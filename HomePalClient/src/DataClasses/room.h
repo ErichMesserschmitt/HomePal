@@ -12,7 +12,7 @@
 class RoomGroup : public QObject {
     Q_OBJECT
 public:
-    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(int index READ index NOTIFY indexChanged)
 public:
     RoomGroup(QObject* parent = nullptr);

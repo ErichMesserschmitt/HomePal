@@ -12,9 +12,15 @@ Rectangle {
     border.color: Style.transparent
     property string name: "Undefined"
     property string status: "Disabled"
+    property string isAuto: "Manual"
     property string enabledAt: "00:00 AM"
     property string disabledAt: "00:00 AM"
     property var additionalInfo: []
+
+    signal editClicked();
+    signal switchClicked();
+    signal delayClicked();
+    signal deleteClicked();
 
     RowLayout {
         anchors.fill: parent;
@@ -33,7 +39,8 @@ Rectangle {
                 Text {
                     anchors.fill: parent;
                     text: root.name
-                    font.pointSize: parent.height * 0.6
+                    font.pixelSize:  parent.height * 0.6
+
                     color: Style.white
                     font.family: Style.fontMain.name
                     horizontalAlignment: Qt.AlignHCenter
@@ -51,10 +58,11 @@ Rectangle {
                     anchors.fill: parent;
                     anchors.margins: parent.height * 0.1
                     text: "Status: " + root.status + "<br>"
+                          + "Type: " + root.isAuto + "<br>"
                           + "Enable At: " + root.enabledAt + "<br>"
                           + "Disable At: " + root.disabledAt
-                    font.pointSize: parent.height * 0.1
-                    color: Style.white
+                    font.pixelSize: parent.height * 0.1
+                    color: Style.black
                     font.family: Style.fontMain.name
                     horizontalAlignment: Qt.AlignLeft
                     verticalAlignment: Qt.AlignVCenter
@@ -123,7 +131,6 @@ Rectangle {
         ColumnLayout {
             Layout.fillHeight: true;
             Layout.fillWidth: true;
-            //Layout.minimumWidth: root.height * 0.25
             spacing: 1
             CustomButton {
                 Layout.fillHeight: false;
@@ -134,7 +141,7 @@ Rectangle {
                 borderWidth: 0
                 image: Style.trashcan
                 onClicked: {
-                    console.log("H", root.height, "W", root.width)
+                    root.deleteClicked();
                 }
 
                 Rectangle {
@@ -157,6 +164,9 @@ Rectangle {
                 text: "Edit"
                 fontFamily: Style.fontMain.name
                 textColor: Style.white
+                onClicked: {
+                    root.editClicked()
+                }
             }
             CustomButton {
                 Layout.fillHeight: false;
@@ -167,6 +177,9 @@ Rectangle {
                 color: Style.blue
                 radius: 0
                 image: Style.delay
+                onClicked: {
+                    root.delayClicked()
+                }
             }
             CustomButton {
                 Layout.fillHeight: false;
@@ -176,6 +189,9 @@ Rectangle {
                 borderWidth: 0
                 color: Style.red
                 image: Style.onoff
+                onClicked: {
+                    root.switchClicked()
+                }
                 Rectangle {
                     anchors.top: parent.top
                     width: parent.width

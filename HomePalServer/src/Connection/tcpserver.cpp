@@ -64,6 +64,7 @@ ServerTCP::ServerTCP(quint16 port, bool debug, QObject *parent) : IServer(port, 
                                             QWebSocketServer::NonSecureMode, this)),
     m_debug(debug)
 {
+    m_debug = false;
     if (m_pWebSocketServer->listen(QHostAddress::Any, port)) {
         if (m_debug)
             qDebug() << "Echoserver listening on port" << port;
@@ -79,6 +80,14 @@ ServerTCP::~ServerTCP()
 {
     m_pWebSocketServer->close();
     qDeleteAll(m_clients.begin(), m_clients.end());
+}
+
+int ServerTCP::sendData(QJsonDocument &data)
+{
+    for(auto& c:m_clients){
+        c->sendBinaryMessage(data.toJson());
+    }
+    return 0;
 }
 
 void ServerTCP::disconnectClient(QWebSocket *socket)
@@ -113,12 +122,15 @@ void ServerTCP::processTextMessage(QString message)
 void ServerTCP::processBinaryMessage(QByteArray message)
 {
     QJsonDocument receivedDoc = QJsonDocument::fromJson(message);
-    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+
+        QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+        if (pClient) {
+            Q_EMIT(receivedData(receivedDoc, pClient));
+        }
+
     if (m_debug)
         qDebug() << "Binary Message received:" << message;
-    if (pClient) {
-        Q_EMIT(receivedData(receivedDoc, pClient));
-    }
+
 }
 
 

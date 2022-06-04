@@ -65,7 +65,7 @@ public:
     explicit ServerTCP(quint16 port, bool debug = false, QObject *parent = nullptr);
     ~ServerTCP();
 
-    int sendData(QJsonDocument& data) override {return 0;};
+    int sendData(QJsonDocument& data) override;
     void disconnectClient(QWebSocket* socket) override;
 
 Q_SIGNALS:
@@ -75,6 +75,7 @@ private Q_SLOTS:
     void onNewConnection();
     void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
+
     void socketDisconnected();
 
 private:

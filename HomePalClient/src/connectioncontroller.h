@@ -38,6 +38,7 @@ public slots:
 public:
 signals:
     void journalReceived(QJsonDocument& doc);
+    void lastPageReceived(QJsonDocument& doc);
     void componentListReceived(QJsonDocument& doc);
 private:
     void processData(QJsonDocument& doc);

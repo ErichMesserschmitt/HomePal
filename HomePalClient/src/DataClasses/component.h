@@ -23,7 +23,7 @@ enum ComponentType {
 class Component : public QObject {
     Q_OBJECT
 public:
-    Q_PROPERTY(QString name         READ name       NOTIFY nameChanged)
+    Q_PROPERTY(QString name         READ name  NOTIFY nameChanged)
     Q_PROPERTY(int index            READ index      NOTIFY indexChanged)
     Q_PROPERTY(float lowPoint       READ lowPoint   NOTIFY lowPointChanged)
     Q_PROPERTY(float highPoint      READ highPoint  NOTIFY highPointChanged)
@@ -33,8 +33,8 @@ public:
     Q_PROPERTY(QList<QString> disableAt READ disableAt NOTIFY disableChanged)
     Q_PROPERTY(int type             READ type       NOTIFY typeChanged)
     Q_PROPERTY(int roomIndex        READ roomIndex  NOTIFY roomIndexChanged)
-    Q_PROPERTY(bool isAuto          READ isAuto     NOTIFY isAutoChanged)
-    Q_PROPERTY(bool enabled         READ enabled    NOTIFY enabledChanged)
+    Q_PROPERTY(bool isAuto          READ isAuto  NOTIFY isAutoChanged)
+    Q_PROPERTY(bool enabled         READ enabled NOTIFY enabledChanged)
     Q_PROPERTY(QDateTime nearestEnable READ nearestEnable NOTIFY nearestEnableChanged)
     Q_PROPERTY(QDateTime nearestDisable READ nearestDisable NOTIFY nearestDisableChanged)
 
@@ -55,28 +55,68 @@ public:
       , m_auto(other.m_auto)
       , m_enabled(other.m_enabled)
     {
-        QTime disableTime = QTime::currentTime();
-        QTime enableTime = QTime::currentTime();
-        for(auto& e : m_enableAt){
-            QTime t = e.time();
-            if(t.hour() < QTime::currentTime().hour() && t.hour() > enableTime.hour()){
-                enableTime = t;
-            }
-        }
-        m_nearestEnable = QDateTime(QDate::currentDate(), enableTime);
-        for(auto& e : m_disableAt){
-            QTime t = e.time();
-            if(t.hour() > QTime::currentTime().hour() && t.hour() < disableTime.hour()){
-                disableTime = t;
-            }
-        }
-        m_nearestDisable = QDateTime(QDate::currentDate(), disableTime);
-        Q_EMIT nearestEnableChanged();
-        Q_EMIT nearestDisableChanged();
+//        QTime disableTime = QTime::currentTime();
+//        QTime enableTime = QTime::currentTime();
+//        for(auto& e : m_enableAt){
+//            QTime t = e.time();
+//            if(t.hour() < QTime::currentTime().hour() && t.hour() > enableTime.hour()){
+//                enableTime = t;
+//            }
+//        }
+//        m_nearestEnable = QDateTime(QDate::currentDate(), enableTime);
+//        for(auto& e : m_disableAt){
+//            QTime t = e.time();
+//            if(t.hour() > QTime::currentTime().hour() && t.hour() < disableTime.hour()){
+//                disableTime = t;
+//            }
+//        }
+//        m_nearestDisable = QDateTime(QDate::currentDate(), disableTime);
+//        Q_EMIT nearestEnableChanged();
+//        Q_EMIT nearestDisableChanged();
+    }
+    Component(const Component* other):
+        QObject(other->parent())
+      , m_index(other->m_index)
+      , m_name(other->m_name)
+      , m_lowPoint(other->m_lowPoint)
+      , m_highPoint(other->m_highPoint)
+      , m_pointDelta(other->m_pointDelta)
+      , m_info(other->m_info)
+      , m_type(other->m_type)
+      , m_roomIndex(other->m_roomIndex)
+      , m_enableAt(other->m_enableAt)
+      , m_disableAt(other->m_disableAt)
+      , m_auto(other->m_auto)
+      , m_enabled(other->m_enabled)
+    {
+//        QTime disableTime = QTime::currentTime();
+//        QTime enableTime = QTime::currentTime();
+//        for(auto& e : m_enableAt){
+//            QTime t = e.time();
+//            if(t.hour() < QTime::currentTime().hour() && t.hour() > enableTime.hour()){
+//                enableTime = t;
+//            }
+//        }
+//        m_nearestEnable = QDateTime(QDate::currentDate(), enableTime);
+//        for(auto& e : m_disableAt){
+//            QTime t = e.time();
+//            if(t.hour() > QTime::currentTime().hour() && t.hour() < disableTime.hour()){
+//                disableTime = t;
+//            }
+//        }
+//        m_nearestDisable = QDateTime(QDate::currentDate(), disableTime);
+//        Q_EMIT nearestEnableChanged();
+//        Q_EMIT nearestDisableChanged();
+    }
+    Component& operator=(const Component* other){
+        return *this;
     }
     Component& operator=(const Component& other){
         return *this;
     }
+
+    Q_INVOKABLE void switchEnabled();
+    Q_INVOKABLE void switchAuto();
 
     static QJsonDocument toDoc(Component& comp);
     static Component fromDoc(QJsonDocument& doc);

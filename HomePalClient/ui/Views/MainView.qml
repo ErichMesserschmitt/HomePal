@@ -13,7 +13,7 @@ Item {
         anchors.fill: parent;
     }
     property int currentWidth: 0;
-    readonly property int minSize: 400 //pixels
+    readonly property int minSize: 400
 
     Item {
         id: backgroundShade
@@ -64,7 +64,7 @@ Item {
             Layout.fillWidth: true;
             property bool selectorVisible: roomList.length < 3 && roomList.length > 0
             property var roomList: _roomController ? _roomController.rooms : []
-            property int selected: 0;
+            property int selected: _roomController ? _roomController.selectedRoom : 0;
 
             CustomButton {
                 id: leftRoom
@@ -129,7 +129,6 @@ Item {
                 fontSize: height * 0.4
                 radius: Style.defaultRadius
                 onClicked: {
-                    //_roomController.addRoom("Test room");
                     console.log("_roomController.components", _roomController.components.length)
                     createRoomNamePopup.open()
                 }
@@ -181,12 +180,39 @@ Item {
 
                         name: _roomController.components[index].name
                         status: _roomController.components[index].enabled ? "Enabled" : "Disabled"
+                        isAuto: _roomController.components[index].isAuto ? "Automatic" : "Manual"
                         property date enDate: _roomController.components[index].nearestEnable
                         property date disDate: _roomController.components[index].nearestDisable
 
                         enabledAt: enDate.toTimeString();
                         disabledAt: disDate.toTimeString();
                         additionalInfo: _roomController.components[index].info
+
+                        onSwitchClicked: {
+                            if(_roomController){
+                                console.log(_roomController.components[index].index)
+                                _roomController.editComponent(_roomController.components[index].index);
+                                _roomController.editableComponent.switchEnabled()
+                                _roomController.saveEditComponent();
+                            }
+                        }
+                        onDelayClicked: {
+                            if(_roomController){
+                                console.log(_roomController.components[index].index)
+                                _roomController.editComponent(_roomController.components[index].index);
+                                _roomController.editableComponent.switchAuto()
+                                _roomController.saveEditComponent();
+                            }
+                        }
+                        onDeleteClicked: {
+                            if(_roomController){
+                                console.log(_roomController.components[index].index, _roomController.components[index].name)
+                                _roomController.removeComponent(_roomController.components[index].index);
+                            }
+                        }
+                        onEditClicked: {
+
+                        }
                     }
                 }
                 CustomButton {
@@ -204,7 +230,8 @@ Item {
                     fontSize: height * 0.4
                     radius: Style.defaultRadius
                     onClicked: {
-                        console.log("adding component")
+                        _roomController.requestNewDevices();
+                        createComponentNamePopup.open();
                     }
                 }
             }
@@ -233,6 +260,10 @@ Item {
                 borderColor: Qt.darker(Style.darkGrey, 1.5)
                 color: Style.red
                 image: Style.trashcan
+                onClicked: {
+                    console.log(_roomController.rooms[_roomController.selectedRoom].index, _roomController.rooms[_roomController.selectedRoom].name)
+                    _roomController.removeRoom(_roomController.rooms[_roomController.selectedRoom].index)
+                }
             }
         }
     }
@@ -251,6 +282,7 @@ Item {
             headerText: "Create name for room"
             onAccepted: function(name) {
                 console.log("createRoomNamePopup::accepted", name)
+                _roomController.addRoom(name);
                 createRoomNamePopup.close();
             }
             onDeclined:{
@@ -275,6 +307,9 @@ Item {
             onAccepted: function(name) {
                 console.log("editRoomNamePopup::accepted", name)
                 editRoomNamePopup.close();
+                _roomController.editRoom(_roomController.selectedRoom);
+                _roomController.editableRoom.name = name
+                _roomController.saveEditRoom();
             }
             onDeclined:{
                 editRoomNamePopup.close();
@@ -293,15 +328,13 @@ Item {
             color: Style.transparent
         }
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-        contentItem: SelectName {
+        contentItem: DevicesList {
             headerText: "Create name for component"
             onAccepted: {
-                console.log("CLOSED", name)
-                createRoomNamePopup.close();
+                createComponentNamePopup.close();
             }
             onDeclined:{
-                console.log("CLOSED")
-                createRoomNamePopup.close();
+                createComponentNamePopup.close();
             }
         }
     }

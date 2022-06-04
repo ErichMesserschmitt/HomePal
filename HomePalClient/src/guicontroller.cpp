@@ -34,7 +34,8 @@ GUI_Controller::GUI_Controller(QObject *parent) : QObject(parent)
     m_initStartTimer.start();
     connect(&m_initStartTimer, &QTimer::timeout, this, &GUI_Controller::initializationFinished);
 
-    connect(m_connController, &ConnectionController::journalReceived, m_roomController, &RoomController::onJournalReceived);
+    connect(m_connController, &ConnectionController::lastPageReceived, m_roomController, &RoomController::onJournalReceived);
+    connect(m_connController, &ConnectionController::journalReceived, m_roomController, &RoomController::onFullJournalReceived);
     connect(m_connController, &ConnectionController::componentListReceived, m_roomController, &RoomController::onComponentsListReceived);
 
 }
