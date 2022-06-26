@@ -13,5 +13,7 @@
         <file>../src/roomcontroller.h</file>
         <file>Popups/SelectName.qml</file>
         <file>Popups/DevicesList.qml</file>
+        <file>fonts/Caviar_Dreams_Bold.ttf</file>
+        <file>Popups/EditParams.qml</file>
     </qresource>
 </RCC>

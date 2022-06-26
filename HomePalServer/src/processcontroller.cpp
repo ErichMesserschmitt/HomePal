@@ -21,18 +21,20 @@ void ProcessController::startServer()
     m_lastPageUpdater->setInterval(60000);
     m_journalUpdater = new QTimer(this);
     m_journalUpdater->setInterval(1800000);
+    m_connectionTimer = new QTimer(this);
     connect(m_lastPageUpdater, &QTimer::timeout, this, &ProcessController::updateLastPage);
     connect(m_journalUpdater, &QTimer::timeout, this, &ProcessController::updateJournal);
+    connect(m_connectionTimer, &QTimer::timeout, this, &ProcessController::updateAll);
+    connect(m_server, &IServer::clientConnected, this, &ProcessController::initializeUpdate);
 
     test();
 
-    updateLastPage();
-    updateJournal();
     m_lastPageUpdater->setSingleShot(false);
     m_lastPageUpdater->start(6000);
     m_journalUpdater->setSingleShot(false);
     m_journalUpdater->start(1800000);
-
+    m_connectionTimer->setSingleShot(true);
+    m_connectionTimer->setInterval(200);
 }
 
 void ProcessController::onDataReceived(QJsonDocument doc, QWebSocket* socket)
@@ -47,8 +49,6 @@ void ProcessController::processData(QJsonDocument &doc, QWebSocket* socket)
     ConnType dataType = static_cast<ConnType>(received.value("type").toInt());
     switch(dataType){
     case ConnType::Init:
-        updateJournal();
-        updateLastPage();
         return;
     case ConnType::RequestComponents:
         sendComponents(socket);
@@ -231,6 +231,7 @@ void ProcessController::sendJournal(QWebSocket* socket)
     }
     objToSend["list"] = pageArray;
     QJsonDocument doc = QJsonDocument(objToSend);
+    qDebug() << "ProcessController::sendJournal :: journal sended " << QDateTime::currentDateTime().toString();
     Q_EMIT dataProcessed(doc);
 }
 
@@ -254,6 +255,7 @@ void ProcessController::sendLastPage()
     pageObj["components"] = compArr;
     pageObj["info"] = infoArr;
     QJsonDocument doc = QJsonDocument(pageObj);
+    qDebug() << "ProcessController::sendLastPage :: last page sended " << QDateTime::currentDateTime().toString();
     Q_EMIT dataProcessed(doc);
 }
 
@@ -285,6 +287,7 @@ void ProcessController::updateJournal()
     page.m_shortInfo = info;
 
     m_fullJournal.append(page);
+    qDebug() << "ProcessController::updateJournal";
     sendJournal();
 }
 
@@ -300,7 +303,19 @@ void ProcessController::updateLastPage()
     QString info = "Time " + QDateTime::currentDateTime().toString(Qt::DateFormat::TextDate) + ". Generated at simulation";
     page.m_shortInfo = info;
     m_lastPage = page;
+    qDebug() << "ProcessController::updateLastPage";
     sendLastPage();
+}
+
+void ProcessController::updateAll()
+{
+    updateLastPage();
+    updateJournal();
+}
+
+void ProcessController::initializeUpdate()
+{
+    m_connectionTimer->start(50);
 }
 
 void ProcessController::test()
@@ -329,10 +344,10 @@ void ProcessController::test()
         c.setHighPoint(high[i]);
         QList<QString> infoList;
         c.setInfo(infoList);
-        QDateTime enableDate(QDate::currentDate(), QTime(1, 22, 0, 0));
-        QDateTime disableDate(QDate::currentDate(), QTime(5, 22, 0, 0));
-        c.setEnableAt({});
-        c.setDisableAt({});
+        QList<QTime> enableDate({QTime(1, 22, 0, 0), QTime(5, 30, 0, 0)});
+        QList<QTime> disableDate({QTime(5, 22, 0, 0), QTime(22, 01, 0, 0)});
+        c.setEnableAt(enableDate);
+        c.setDisableAt(disableDate);
         c.setType(type[i]);
         c.setIsAuto(false);
         c.setEnabled(false);

@@ -26,7 +26,7 @@ FILE(GLOB SOURCE_FILES
     )
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
-find_package(Qt6 COMPONENTS Core Quick Qml Concurrent Widgets Multimedia WebSockets REQUIRED)
+find_package(Qt6 COMPONENTS Core Quick Qml Concurrent Widgets WebSockets REQUIRED)
 #find_package(Qt6QuickCompiler)
 
 qt6_add_resources(RESOURCES ui/qml.qrc)
@@ -44,7 +44,6 @@ target_link_libraries(${PROJECT_NAME}
     Qt6::Qml
     Qt6::Concurrent
     Qt6::Widgets
-    Qt6::Multimedia
     Qt6::WebSockets
 )
 

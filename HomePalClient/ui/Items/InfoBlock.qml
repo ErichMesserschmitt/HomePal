@@ -57,10 +57,10 @@ Rectangle {
                 Text {
                     anchors.fill: parent;
                     anchors.margins: parent.height * 0.1
-                    text: "Status: " + root.status + "<br>"
-                          + "Type: " + root.isAuto + "<br>"
-                          + "Enable At: " + root.enabledAt + "<br>"
-                          + "Disable At: " + root.disabledAt
+                    text: "Статус: " + root.status + "<br>"
+                          + "Тип: " + root.isAuto + "<br>"
+                          + "Увімкнеться: " + root.enabledAt + "<br>"
+                          + "Вимкнеться: " + root.disabledAt
                     font.pixelSize: parent.height * 0.1
                     color: Style.black
                     font.family: Style.fontMain.name

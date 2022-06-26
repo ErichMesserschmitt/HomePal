@@ -43,7 +43,7 @@ Item {
                 textColor: Style.white
                 fontSize: height * 0.5
                 fontFamily: Style.fontMain.name
-                text: "Connection Status"
+                text: "Статус підключення"
             }
             CustomButton {
                 Layout.fillHeight: true;
@@ -112,6 +112,7 @@ Item {
 
                     borderColor: roomSelected ? Style.darkOrange : Style.semiTransparentGrey
                     text: _roomController.rooms[index].name
+                    textColor: _roomController.selectedRoom === _roomController.rooms[index].index ? Style.black : Style.white
                     onClicked: {
                         _roomController.selectedRoom = _roomController.rooms[index].index
                     }
@@ -179,13 +180,12 @@ Item {
                         readonly property var locale: Qt.locale()
 
                         name: _roomController.components[index].name
-                        status: _roomController.components[index].enabled ? "Enabled" : "Disabled"
-                        isAuto: _roomController.components[index].isAuto ? "Automatic" : "Manual"
-                        property date enDate: _roomController.components[index].nearestEnable
-                        property date disDate: _roomController.components[index].nearestDisable
+                        status: _roomController.components[index].enabled ? "Увімкнено" : "Вимкнено"
+                        isAuto: _roomController.components[index].isAuto ? "Автоматичний" : "Ручний"
 
-                        enabledAt: enDate.toTimeString();
-                        disabledAt: disDate.toTimeString();
+
+//                        enabledAt: enDate.toTimeString();
+//                        disabledAt: disDate.toTimeString();
                         additionalInfo: _roomController.components[index].info
 
                         onSwitchClicked: {
@@ -211,7 +211,10 @@ Item {
                             }
                         }
                         onEditClicked: {
-
+                            console.log(_roomController.components[index].index)
+                            _roomController.editComponent(_roomController.components[index].index);
+                            editComponentPopup.headerText = _roomController.editableComponent.name
+                            editComponentPopup.open();
                         }
                     }
                 }
@@ -248,7 +251,7 @@ Item {
                 textColor: Style.white
                 fontSize: height * 0.5
                 fontFamily: Style.fontMain.name
-                text: "Edit"
+                text: "Змінити"
                 onClicked: {
                     editRoomNamePopup.open()
                 }
@@ -263,6 +266,7 @@ Item {
                 onClicked: {
                     console.log(_roomController.rooms[_roomController.selectedRoom].index, _roomController.rooms[_roomController.selectedRoom].name)
                     _roomController.removeRoom(_roomController.rooms[_roomController.selectedRoom].index)
+                    _roomController.selectedRoom = 0;
                 }
             }
         }
@@ -279,7 +283,7 @@ Item {
         }
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
         contentItem: SelectName {
-            headerText: "Create name for room"
+            headerText: "Створення назви кімнати"
             onAccepted: function(name) {
                 console.log("createRoomNamePopup::accepted", name)
                 _roomController.addRoom(name);
@@ -303,7 +307,7 @@ Item {
         }
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
         contentItem: SelectName {
-            headerText: "Edit name for room"
+            headerText: "Зміна назви кімнати"
             onAccepted: function(name) {
                 console.log("editRoomNamePopup::accepted", name)
                 editRoomNamePopup.close();
@@ -329,12 +333,35 @@ Item {
         }
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
         contentItem: DevicesList {
-            headerText: "Create name for component"
+            headerText: "Компонент для " + _roomController.rooms[_roomController.selectedRoom].name
             onAccepted: {
                 createComponentNamePopup.close();
             }
             onDeclined:{
                 createComponentNamePopup.close();
+            }
+        }
+    }
+    Popup {
+        id: editComponentPopup
+        width: root.width
+        height: root.height
+        modal: true;
+        dim: true;
+        focus: true;
+        background: Rectangle {
+            color: Style.semiTransparent
+
+        }
+        property string headerText: "Помилка вибору компонента"
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        contentItem: EditParams {
+            headerText: editComponentPopup.headerText
+            onAccepted: {
+                editComponentPopup.close();
+            }
+            onDeclined:{
+                editComponentPopup.close();
             }
         }
     }

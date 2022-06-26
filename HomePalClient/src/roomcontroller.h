@@ -77,12 +77,10 @@ public slots:
     void onComponentsListReceived(QJsonDocument& doc);
 
 private:
-    void testRooms();
-
     int m_selectedRoom = 0;
 
     RoomGroup* m_editableRoom;
-    Component* m_editableComponent;
+    Component* m_editableComponent = nullptr;
 
     JournalPage m_lastPage;
     QList<JournalPage> m_fullJournal;

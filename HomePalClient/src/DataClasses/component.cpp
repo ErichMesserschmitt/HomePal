@@ -36,11 +36,9 @@ QJsonDocument Component::toDoc(Component &comp)
     QJsonArray enableAtArray;
     QJsonArray disableAtArray;
     QJsonArray infoArray;
-    for(auto& p : comp.enableAtQ()){
-        enableAtArray.append(p.toString(Qt::DateFormat::TextDate));
-    }
-    for(auto& p : comp.disableAtQ()){
-        disableAtArray.append(p.toString(Qt::DateFormat::TextDate));
+    for(auto& t: comp.m_timePlan){
+        enableAtArray.append(t.enableAt.toString());
+        disableAtArray.append(t.disableAt.toString());
     }
     for(auto& p : comp.info()){
         infoArray.append(p);
@@ -67,22 +65,23 @@ Component Component::fromDoc(QJsonDocument &doc)
     component.setEnabled(comp.value("enabled").toBool());
     component.setIndex(comp.value("index").toInt());
     QJsonArray enableAtArray = comp.value("enableAt").toArray();
-    QList<QDateTime> enableAtList;
+    QList<QTime> enableAtList;
     QJsonArray disableAtArray = comp.value("disableAt").toArray();
-    QList<QDateTime> disableAtList;;
+    QList<QTime> disableAtList;;
     QJsonArray infoArray = comp.value("info").toArray();
     QList<QString> infoList;
     for(auto a : enableAtArray) {
-        enableAtList.append(QDateTime::fromString(a.toString()));
+        enableAtList.append(QTime::fromString(a.toString()));
     }
     for(auto a : disableAtArray) {
-        disableAtList.append(QDateTime::fromString(a.toString()));
+        disableAtList.append(QTime::fromString(a.toString()));
     }
     for(auto a : infoArray) {
         infoList.append(a.toString());
     }
-    component.m_enableAt = enableAtList;
-    component.m_disableAt = disableAtList;
+    for(int i =0; i<enableAtList.size(); ++i){
+        component.m_timePlan.append(TimePlan{enableAtList[i], disableAtList[i]});
+    }
     component.m_info = infoList;
 
     return component;
@@ -91,17 +90,19 @@ Component Component::fromDoc(QJsonDocument &doc)
 QList<QString> Component::enableAt()
 {
     QList<QString> list;
-    for(auto& time : m_enableAt){
-        list.append(time.toString());
+    for(auto& time : m_timePlan){
+        list.append(time.enableAt.toString());
     }
+    return list;
 }
 
 QList<QString> Component::disableAt()
 {
     QList<QString> list;
-    for(auto& time : m_disableAt){
-        list.append(time.toString());
+    for(auto& time : m_timePlan){
+        list.append(time.disableAt.toString());
     }
+    return list;
 }
 
 void Component::setIndex(int index)
@@ -146,16 +147,10 @@ void Component::setType(ComponentType type)
     Q_EMIT typeChanged();
 }
 
-void Component::setEnableAt(QList<QDateTime> d)
+void Component::setTimePlan(QList<TimePlan> plan)
 {
-    m_enableAt = d;
-    Q_EMIT enableChanged();
-}
-
-void Component::setDisableAt(QList<QDateTime> d)
-{
-    m_disableAt = d;
-    Q_EMIT disableChanged();
+m_timePlan = plan;
+Q_EMIT timePlanChanged();
 }
 
 void Component::setRoomIndex(int index)
@@ -174,10 +169,20 @@ void Component::setEnabled(bool v)
 {
     if(m_enabled != v){
         m_enabled = v;
-        QString infoString = (m_enabled ? "Enabled at " : "Disabled at ");
+        QString infoString = (m_enabled ? "Ввімкнено о " : "Вимкнено о ");
         m_info.push_front(infoString + QTime::currentTime().toString());
         Q_EMIT enabledChanged();
     }
+}
+
+void Component::setValue(float v){
+    m_value = v;
+    Q_EMIT valueChanged();
+}
+
+void Component::setValueName(QString v){
+    m_valueName = v;
+    Q_EMIT valueNameChanged();
 }
 
 

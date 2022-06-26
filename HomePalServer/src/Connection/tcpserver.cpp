@@ -105,6 +105,7 @@ void ServerTCP::onNewConnection()
     connect(pSocket, &QWebSocket::disconnected, this, &ServerTCP::socketDisconnected);
 
     m_clients << pSocket;
+    Q_EMIT clientConnected();
 }
 
 

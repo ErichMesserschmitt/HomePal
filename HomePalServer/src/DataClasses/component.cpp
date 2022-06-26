@@ -80,6 +80,7 @@ QList<QString> Component::enableAt()
     for(auto& time : m_enableAt){
         list.append(time.toString());
     }
+    return list;
 }
 
 QList<QString> Component::disableAt()
@@ -88,6 +89,7 @@ QList<QString> Component::disableAt()
     for(auto& time : m_disableAt){
         list.append(time.toString());
     }
+    return list;
 }
 
 void Component::setIndex(int index)
@@ -132,13 +134,13 @@ void Component::setType(ComponentType type)
     Q_EMIT typeChanged();
 }
 
-void Component::setEnableAt(QList<QDateTime> d)
+void Component::setEnableAt(QList<QTime> d)
 {
     m_enableAt = d;
     Q_EMIT enableChanged();
 }
 
-void Component::setDisableAt(QList<QDateTime> d)
+void Component::setDisableAt(QList<QTime> d)
 {
     m_disableAt = d;
     Q_EMIT disableChanged();
@@ -152,15 +154,19 @@ void Component::setRoomIndex(int index)
 
 void Component::setIsAuto(bool v)
 {
-    m_auto = v;
-    Q_EMIT isAutoChanged();
+    if(m_auto != v){
+        m_auto = v;
+        QString infoString = (m_auto ? "Автоматичний режим о " : "Ручний режим о ");
+        m_info.push_front(infoString + QTime::currentTime().toString());
+        Q_EMIT isAutoChanged();
+    }
 }
 
 void Component::setEnabled(bool v)
 {
     if(m_enabled != v){
         m_enabled = v;
-        QString infoString = (m_enabled ? "Enabled at " : "Disabled at ");
+        QString infoString = (m_enabled ? "Увімкнений о " : "Вимкнений о ");
         m_info.push_front(infoString + QTime::currentTime().toString());
         Q_EMIT enabledChanged();
     }

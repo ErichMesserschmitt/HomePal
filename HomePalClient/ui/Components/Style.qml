@@ -47,7 +47,7 @@ QtObject {
     readonly property int defaultWidth: 4
 
     readonly property string fontFamily: "Droid Sans"
-    readonly property var fontMain: FontLoader { id: fontMainLoader; source: "../fonts/Koulen-Regular.ttf" }
+    readonly property var fontMain: FontLoader { id: fontMainLoader; source: "../fonts/Caviar_Dreams_Bold.ttf" }
 
     readonly property string bluetooth: "qrc:icons/bluetooth.png"
     readonly property string cross: "qrc:icons/cross.png"

@@ -44,6 +44,7 @@ public:
 
 signals:
     void receivedData(QJsonDocument arr, QWebSocket* socket);
+    void clientConnected();
 public slots:
     void socketDisconnected() {qDebug() << "Socket disconnected";};
 

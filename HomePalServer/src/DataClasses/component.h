@@ -34,8 +34,7 @@ public:
     Q_PROPERTY(int roomIndex        READ roomIndex  NOTIFY roomIndexChanged)
     Q_PROPERTY(bool isAuto          READ isAuto     NOTIFY isAutoChanged)
     Q_PROPERTY(bool enabled         READ enabled    NOTIFY enabledChanged)
-    Q_PROPERTY(QDateTime nearestEnable READ nearestEnable NOTIFY nearestEnableChanged)
-    Q_PROPERTY(QDateTime nearestDisable READ nearestDisable NOTIFY nearestDisableChanged)
+
 
 public:
     explicit Component(QObject* parent = nullptr);
@@ -54,25 +53,8 @@ public:
       , m_auto(other.m_auto)
       , m_enabled(other.m_enabled)
     {
-        QTime disableTime = QTime::currentTime();
-        QTime enableTime = QTime::currentTime();
-        for(auto& e : m_enableAt){
-            QTime t = e.time();
-            if(t.hour() < QTime::currentTime().hour() && t.hour() > enableTime.hour()){
-                enableTime = t;
-            }
-        }
-        m_nearestEnable = QDateTime(QDate::currentDate(), enableTime);
-        for(auto& e : m_disableAt){
-            QTime t = e.time();
-            if(t.hour() > QTime::currentTime().hour() && t.hour() < disableTime.hour()){
-                disableTime = t;
-            }
-        }
-        m_nearestDisable = QDateTime(QDate::currentDate(), disableTime);
-        Q_EMIT nearestEnableChanged();
-        Q_EMIT nearestDisableChanged();
     }
+
     Component& operator=(const Component& other){
         return *this;
     }
@@ -92,11 +74,8 @@ public:
     QList<QString> enableAt();
     QList<QString> disableAt();
 
-    QList<QDateTime> enableAtQ() {return m_enableAt;};
-    QList<QDateTime> disableAtQ() {return m_disableAt;};
-
-    QDateTime nearestEnable() {return m_nearestEnable;};
-    QDateTime nearestDisable(){return m_nearestDisable;};
+    QList<QTime> enableAtQ() {return m_enableAt;};
+    QList<QTime> disableAtQ() {return m_disableAt;};
 
     bool isAuto() {return m_auto;}
     bool enabled() {return m_enabled;}
@@ -108,8 +87,8 @@ public:
     void setDelta(float d);
     void setInfo(QList<QString> info);
     void setType(ComponentType type);
-    void setEnableAt(QList<QDateTime> d);
-    void setDisableAt(QList<QDateTime> d);
+    void setEnableAt(QList<QTime> d);
+    void setDisableAt(QList<QTime> d);
     void setRoomIndex(int index);
     void setIsAuto(bool v);
     void setEnabled(bool v);
@@ -141,10 +120,8 @@ private:
     float m_highPoint = 0;
     float m_pointDelta = 0.1;
     float m_value = 0;
-    QList<QDateTime> m_enableAt;
-    QList<QDateTime> m_disableAt;
-    QDateTime m_nearestEnable;
-    QDateTime m_nearestDisable;
+    QList<QTime> m_enableAt;
+    QList<QTime> m_disableAt;
     bool m_auto = false;
     bool m_enabled = false;
     QList<QString> m_info;

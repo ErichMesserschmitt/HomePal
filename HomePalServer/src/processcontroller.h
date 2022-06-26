@@ -54,10 +54,12 @@ private:
     void sendJournal(QWebSocket* socket = nullptr);
     void sendLastPage();
     void sendComponents(QWebSocket* socket);
+
 private slots:
     void updateJournal();
     void updateLastPage();
-
+    void updateAll();
+    void initializeUpdate();
 private:
     QList<JournalPage> m_fullJournal;
     JournalPage m_lastPage;
@@ -73,5 +75,6 @@ private:
 
     QTimer* m_lastPageUpdater;
     QTimer* m_journalUpdater;
+    QTimer* m_connectionTimer;
     int m_defaultPort = 1488;
 };

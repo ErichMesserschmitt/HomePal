@@ -194,43 +194,6 @@ void RoomController::onComponentsListReceived(QJsonDocument &doc)
     Q_EMIT pendingComponentsChanged();
 }
 
-void RoomController::testRooms()
-{
-    for(int i =0; i<2; ++i){
-        RoomGroup room;
-        room.setIndex(i);
-        QString name = i == 0 ? "Home" : "Room N" + QString::number(i);
-        room.setName(name);
-        m_lastPage.m_rooms.push_back(new RoomGroup(room));
-    }
-    for(int i =0; i<8; ++i){
-        Component c;
-        QString name = "Component " + QString::number(i + 1);
-        c.setName(name);
-        c.setIndex(i);
-        c.setRoomIndex((i%2) + 1);
-        c.setDelta(0.1);
-        c.setLowPoint(-1.0);
-        c.setHighPoint(1.0);
-        QList<QString> infoList;
-        for(int k=0; k<5; ++k){
-            infoList.append("test info " + QString::number(k+1));
-        }
-        c.setInfo(infoList);
-        QDateTime enableDate(QDate::currentDate(), QTime(1, 22, 0, 0));
-        QDateTime disableDate(QDate::currentDate(), QTime(5, 22, 0, 0));
-
-        c.setEnableAt({enableDate});
-        c.setDisableAt({disableDate});
-        c.setType(i%2 ? ComponentType::Slider : ComponentType::Switcher);
-        c.setIsAuto(i%2);
-        c.setEnabled(true);
-        m_lastPage.m_components.push_back(new Component(c));
-    }
-    Q_EMIT lastPageChanged();
-
-}
-
 
 
 
