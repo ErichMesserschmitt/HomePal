@@ -7,8 +7,11 @@
 
 Component::Component(QObject *parent) : QObject(parent)
 {
-
-
+    m_enableTimer = new QTimer();
+    m_disableTimer = new QTimer();
+    connect(m_enableTimer, &QTimer::timeout, this, &Component::enableComponent);
+    connect(m_disableTimer, &QTimer::timeout, this, &Component::disableComponent);
+    fetchTimes(QTime::currentTime());
 }
 
 QJsonDocument Component::toDoc(Component &comp)
@@ -23,6 +26,9 @@ QJsonDocument Component::toDoc(Component &comp)
     component["isAuto"] = comp.isAuto();
     component["enabled"] = comp.enabled();
     component["index"] = comp.index();
+    component["value"] = comp.value();
+    component["enStr"] = comp.m_nextEnable.toString();
+    component["disStr"] = comp.m_nextDisable.toString();
     QJsonArray enableAtArray;
     QJsonArray disableAtArray;
     QJsonArray infoArray;
@@ -55,21 +61,24 @@ Component Component::fromDoc(QJsonDocument &doc)
     component.setIsAuto(comp.value("isAuto").toBool(false));
     component.setEnabled(comp.value("enabled").toBool());
     component.setIndex(comp.value("index").toInt());
+    component.setValue(comp.value("value").toDouble());
     QJsonArray enableAtArray = comp.value("enableAt").toArray();
-    QList<QDateTime> enableAtList;
+    QList<QTime> enableAtList;
     QJsonArray disableAtArray = comp.value("disableAt").toArray();
-    QList<QDateTime> disableAtList;;
+    QList<QTime> disableAtList;;
     QJsonArray infoArray = comp.value("info").toArray();
     QList<QString> infoList;
     for(auto a : enableAtArray) {
-        enableAtList.append(QDateTime::fromString(a.toString()));
+        enableAtList.append(QTime::fromString(a.toString()));
     }
     for(auto a : disableAtArray) {
-        disableAtList.append(QDateTime::fromString(a.toString()));
+        disableAtList.append(QTime::fromString(a.toString()));
     }
     for(auto a : infoArray) {
         infoList.append(a.toString());
     }
+    component.setEnableAt(enableAtList);
+    component.setDisableAt(disableAtList);
 
     return component;
 }
@@ -156,7 +165,7 @@ void Component::setIsAuto(bool v)
 {
     if(m_auto != v){
         m_auto = v;
-        QString infoString = (m_auto ? "Автоматичний режим о " : "Ручний режим о ");
+        QString infoString = (m_auto ? "Автоматичний режим увімкнений о " : "Ручний режим увімкнений о ");
         m_info.push_front(infoString + QTime::currentTime().toString());
         Q_EMIT isAutoChanged();
     }
@@ -171,6 +180,112 @@ void Component::setEnabled(bool v)
         Q_EMIT enabledChanged();
     }
 }
+
+void Component::enableComponent()
+{
+    m_enableTimer->stop();
+    if(m_auto){
+        setEnabled(true);
+    }
+    fetchTimes(QTime::currentTime());
+}
+
+void Component::disableComponent()
+{
+    m_disableTimer->stop();
+    if(m_auto){
+        setEnabled(false);
+    }
+    fetchTimes(QTime::currentTime());
+}
+
+void Component::fetchTimes(QTime startTime)
+{
+    QTime now = QTime::currentTime();
+    QTime previousEnable = findPrevious(now, m_enableAt);
+    QTime previousDisable = findPrevious(now, m_disableAt);
+    QTime nextEnable = findNext(now, m_enableAt);
+    QTime nextDisable = findNext(now, m_disableAt);
+    m_nextEnable = nextEnable;
+    m_nextDisable = nextDisable;
+    if(previousDisable < previousEnable) {
+        if(m_auto){
+            setEnabled(true);
+        }
+    }
+
+    int toen = QTime::currentTime().secsTo(nextEnable) * 1000;
+    int todi = QTime::currentTime().secsTo(nextDisable)* 1000;
+    if(toen > 0){
+        m_enableTimer->start(toen);
+    }
+    if(todi > 0){
+        m_disableTimer->start(todi);
+    }
+}
+
+QTime Component::findNext(QTime startTime, QList<QTime> list)
+{
+    QTime minimalTime;
+
+    //disabled Times
+    bool firstTime = true;
+    bool foundOne = false;
+    for(auto& t : list){
+        if(t > startTime){
+            foundOne = true;
+            if(firstTime) {
+                firstTime = false;
+                minimalTime = t;
+            }
+            minimalTime = std::min(minimalTime, t);
+        }
+    }
+
+    firstTime = true;
+    if(!foundOne) {
+        for(auto& t : list){
+            if(firstTime) {
+                firstTime = false;
+                minimalTime = t;
+            }
+            minimalTime = std::min(minimalTime, t);
+        }
+    }
+    return minimalTime;
+}
+
+QTime Component::findPrevious(QTime startTime, QList<QTime> list)
+{
+    QTime maximalTime;
+
+    bool firstTime = true;
+    bool foundOne = false;
+    for(auto& t : list){
+        if(t < startTime){
+            foundOne = true;
+            if(firstTime) {
+                firstTime = false;
+                maximalTime = t;
+            }
+            maximalTime = std::max(maximalTime, t);
+
+        }
+    }
+    firstTime = true;
+    if(!foundOne) {
+        for(auto& t : list){
+            if(firstTime) {
+                firstTime = false;
+                maximalTime = t;
+            }
+            maximalTime = std::max(maximalTime, t);
+        }
+    }
+    return maximalTime;
+}
+
+
 
 
 

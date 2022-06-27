@@ -7,13 +7,15 @@
 ConnectionController::ConnectionController(QObject *parent) : QObject(parent)
 {
     qDebug() << "ConnectionController::ConnectionController is initialized";
-    startClient();
 }
 
 void ConnectionController::startClient()
 {
     m_client = new ClientTCP(QStringLiteral("ws://") + m_defaultAdress + ":" + QString::number(m_defaultPort));
     connect(m_client, &IClient::receivedDataChanged, this, &ConnectionController::onDataReceived);
+    connect(m_client, &IClient::connectionLost, this, &ConnectionController::connectionLost);
+    connect(m_client, &IClient::connected, this, &ConnectionController::connected);
+
     m_defaultAdress = "127.0.0.1";
     m_defaultPort = 1488;
 }
@@ -22,7 +24,6 @@ void ConnectionController::startClient(QString adress, int port)
 {
     m_defaultAdress = adress;
     m_defaultPort = port;
-    startClient();
 }
 
 void ConnectionController::stopClient()
@@ -108,6 +109,7 @@ void ConnectionController::editComponent(Component &comp)
 void ConnectionController::editRoom(RoomGroup &room)
 {
     QJsonDocument doc = RoomGroup::toDoc(room);
+    qDebug() << "DOC DOC DOC" << doc;
     QJsonObject d = doc.object();
     d["type"] = ConnType::EditRoom;
     doc = QJsonDocument(d);

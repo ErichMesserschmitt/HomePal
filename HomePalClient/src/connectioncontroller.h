@@ -40,6 +40,8 @@ signals:
     void journalReceived(QJsonDocument& doc);
     void lastPageReceived(QJsonDocument& doc);
     void componentListReceived(QJsonDocument& doc);
+    void connectionLost();
+    void connected();
 private:
     void processData(QJsonDocument& doc);
     IClient* m_client;

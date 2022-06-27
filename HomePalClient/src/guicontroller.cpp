@@ -37,7 +37,14 @@ GUI_Controller::GUI_Controller(QObject *parent) : QObject(parent)
     connect(m_connController, &ConnectionController::lastPageReceived, m_roomController, &RoomController::onJournalReceived);
     connect(m_connController, &ConnectionController::journalReceived, m_roomController, &RoomController::onFullJournalReceived);
     connect(m_connController, &ConnectionController::componentListReceived, m_roomController, &RoomController::onComponentsListReceived);
+    connect(m_connController, &ConnectionController::connected, this, &GUI_Controller::onConnected);
+    connect(m_connController, &ConnectionController::connectionLost, this, &GUI_Controller::onDisconnected);
+}
 
+void GUI_Controller::restartClient()
+{
+   // m_connController->stopClient();
+    m_connController->startClient();
 }
 
 void GUI_Controller::initializationFinished()
@@ -51,6 +58,18 @@ void GUI_Controller::initializationFinished()
 void GUI_Controller::onClosed()
 {
     qDebug() << "AA";
+}
+
+void GUI_Controller::onConnected()
+{
+    m_connectionStatus = "З'єднано з сервером";
+    Q_EMIT statusChanged();
+}
+
+void GUI_Controller::onDisconnected()
+{
+    m_connectionStatus = "З'єднання втрачено";
+    Q_EMIT statusChanged();
 }
 
 

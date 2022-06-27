@@ -53,6 +53,7 @@
 #include "connection.h"
 #include <QtCore/QObject>
 #include <QtWebSockets/QWebSocket>
+#include <QTimer>
 
 class ClientTCP : public IClient
 {
@@ -69,6 +70,10 @@ private slots:
     void onConnected();
     void onTextMessageReceived(QString message);
     void onDataReceived(QByteArray data);
+    void onPingSent();
+    void onConnectionLost();
+    void onPingReceived(quint64 elapsedTime, const QByteArray &payload);
+    void prepareSendPing();
 protected:
     void setReceivedData(QJsonDocument& doc) override;
 

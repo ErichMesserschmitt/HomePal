@@ -38,6 +38,8 @@ public:
     Q_PROPERTY(QList<QString> info    READ info       NOTIFY infoChanged)
     Q_PROPERTY(QList<QString> enableAt  READ enableAt  NOTIFY enableChanged)
     Q_PROPERTY(QList<QString> disableAt READ disableAt NOTIFY disableChanged)
+    Q_PROPERTY(QString enStr        READ enStr NOTIFY enableChanged)
+    Q_PROPERTY(QString disStr        READ disStr NOTIFY disableChanged)
     Q_PROPERTY(int type             READ type       NOTIFY typeChanged)
     Q_PROPERTY(int roomIndex        READ roomIndex  NOTIFY roomIndexChanged)
     Q_PROPERTY(bool isAuto          READ isAuto  NOTIFY isAutoChanged)
@@ -60,6 +62,8 @@ public:
       , m_enabled(other.m_enabled)
       , m_value(other.m_value)
       , m_valueName(other.m_valueName)
+      , m_enStr(other.m_enStr)
+      , m_disStr(other.m_disStr)
     {
 
     }
@@ -78,6 +82,8 @@ public:
       , m_enabled(other->m_enabled)
       , m_value(other->m_value)
       , m_valueName(other->m_valueName)
+      , m_enStr(other->m_enStr)
+      , m_disStr(other->m_disStr)
     {
 
     }
@@ -90,6 +96,9 @@ public:
 
     Q_INVOKABLE void switchEnabled();
     Q_INVOKABLE void switchAuto();
+    Q_INVOKABLE void addTimePlan(int hourEn, int minEn, int hourDi, int minDi);
+    Q_INVOKABLE void editTimePlan(int index, int hourEn, int minEn, int hourDi, int minDi);
+    Q_INVOKABLE void deleteTimePlan(int index);
 
 
     static QJsonDocument toDoc(Component& comp);
@@ -97,6 +106,8 @@ public:
 
     int index() {return m_index;}
     QString name() {return m_name;}
+    QString enStr() {return m_enStr;}
+    QString disStr() {return m_disStr;}
     float lowPoint() {return m_lowPoint;}
     float highPoint() {return m_highPoint;}
     float delta() {return m_pointDelta;}
@@ -157,6 +168,8 @@ private:
     float m_pointDelta = 0.1;
     float m_value = 0;
     QString m_valueName = "";
+    QString m_enStr;
+    QString m_disStr;
     QList<TimePlan> m_timePlan;
     bool m_auto = false;
     bool m_enabled = false;

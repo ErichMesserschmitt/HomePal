@@ -21,6 +21,36 @@ void Component::switchAuto()
     setIsAuto(!m_auto);
 }
 
+void Component::addTimePlan(int hourEn, int minEn, int hourDi, int minDi)
+{
+    m_timePlan.append(TimePlan{QTime(hourEn, minEn, 0, 0), QTime(hourDi, minDi, 0, 0)});
+    Q_EMIT enableChanged();
+    Q_EMIT disableChanged();
+}
+
+void Component::editTimePlan(int index, int hourEn, int minEn, int hourDi, int minDi)
+{
+    if(index >= 0 && index < m_timePlan.size()){
+        m_timePlan[index].enableAt = QTime(hourEn, minEn, 0, 0);
+        m_timePlan[index].disableAt = QTime(hourDi, minDi, 0, 0);
+    }
+    Q_EMIT enableChanged();
+    Q_EMIT disableChanged();
+}
+
+void Component::deleteTimePlan(int index)
+{
+    QList<TimePlan> list;
+    for(int i =0; i<m_timePlan.size(); ++i){
+        if(i != index){
+            list.append(m_timePlan[i]);
+        }
+    }
+    m_timePlan = list;
+    Q_EMIT enableChanged();
+    Q_EMIT disableChanged();
+}
+
 QJsonDocument Component::toDoc(Component &comp)
 {
     QJsonObject component;
@@ -33,6 +63,7 @@ QJsonDocument Component::toDoc(Component &comp)
     component["isAuto"] = comp.isAuto();
     component["enabled"] = comp.enabled();
     component["index"] = comp.index();
+    component["value"] = comp.value();
     QJsonArray enableAtArray;
     QJsonArray disableAtArray;
     QJsonArray infoArray;
@@ -64,6 +95,9 @@ Component Component::fromDoc(QJsonDocument &doc)
     component.setIsAuto(comp.value("isAuto").toBool(false));
     component.setEnabled(comp.value("enabled").toBool());
     component.setIndex(comp.value("index").toInt());
+    component.setValue(comp.value("value").toDouble());
+    component.m_enStr = (comp.value("enStr").toString());
+    component.m_disStr = (comp.value("disStr").toString());
     QJsonArray enableAtArray = comp.value("enableAt").toArray();
     QList<QTime> enableAtList;
     QJsonArray disableAtArray = comp.value("disableAt").toArray();

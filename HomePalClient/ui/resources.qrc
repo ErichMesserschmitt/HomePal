@@ -15,5 +15,6 @@
         <file>Popups/DevicesList.qml</file>
         <file>fonts/Caviar_Dreams_Bold.ttf</file>
         <file>Popups/EditParams.qml</file>
+        <file>Popups/EditTime.qml</file>
     </qresource>
 </RCC>

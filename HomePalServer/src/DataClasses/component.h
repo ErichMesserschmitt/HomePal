@@ -53,6 +53,11 @@ public:
       , m_auto(other.m_auto)
       , m_enabled(other.m_enabled)
     {
+        m_enableTimer = new QTimer();
+        m_disableTimer = new QTimer();
+        connect(m_enableTimer, &QTimer::timeout, this, &Component::enableComponent);
+        connect(m_disableTimer, &QTimer::timeout, this, &Component::disableComponent);
+        fetchTimes(QTime::currentTime());
     }
 
     Component& operator=(const Component& other){
@@ -61,6 +66,10 @@ public:
 
     static QJsonDocument toDoc(Component& comp);
     static Component fromDoc(QJsonDocument& doc);
+    void fetchTimes(QTime startTime);
+    QTime findNext(QTime startTime, QList<QTime> list);
+    QTime findPrevious(QTime startTime, QList<QTime> list);
+
 
     int index() {return m_index;}
     QString name() {return m_name;}
@@ -95,6 +104,7 @@ public:
     void setValue(float val) {m_value = val; Q_EMIT valueChanged();}
 
 
+
 signals:
     void nameChanged();
     void indexChanged();
@@ -111,7 +121,11 @@ signals:
     void nearestEnableChanged();
     void nearestDisableChanged();
     void valueChanged();
+private slots:
+    void enableComponent();
+    void disableComponent();
 private:
+
     int m_index = 0;
     int m_roomIndex = 0;
     QString m_name = "Default Room " + QString::number(m_roomIndex);
@@ -125,4 +139,11 @@ private:
     bool m_auto = false;
     bool m_enabled = false;
     QList<QString> m_info;
+    QString m_enString;
+    QString m_disString;
+
+    QTime m_nextEnable;
+    QTime m_nextDisable;
+    QTimer* m_enableTimer;
+    QTimer* m_disableTimer;
 };

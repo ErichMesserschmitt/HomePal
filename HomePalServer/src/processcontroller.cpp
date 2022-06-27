@@ -152,6 +152,10 @@ void ProcessController::editComponent(QJsonDocument& data)
             c.setLowPoint(copy.lowPoint());
             c.setHighPoint(copy.highPoint());
             c.setDelta(copy.delta());
+            c.setEnableAt(comp.enableAtQ());
+            c.setDisableAt(comp.disableAtQ());
+            c.setValue(comp.value());
+            c.fetchTimes(QTime::currentTime());
             updateLastPage();
         }
     }
@@ -345,7 +349,7 @@ void ProcessController::test()
         QList<QString> infoList;
         c.setInfo(infoList);
         QList<QTime> enableDate({QTime(1, 22, 0, 0), QTime(5, 30, 0, 0)});
-        QList<QTime> disableDate({QTime(5, 22, 0, 0), QTime(22, 01, 0, 0)});
+        QList<QTime> disableDate({QTime(5, 22, 0, 0), QTime(5, 35, 0, 0)});
         c.setEnableAt(enableDate);
         c.setDisableAt(disableDate);
         c.setType(type[i]);
@@ -365,7 +369,7 @@ void ProcessController::simulateSomeResults()
         case ComponentType::Slider:
             return;
         default:
-        return;
+            return;
         }
     }
 }

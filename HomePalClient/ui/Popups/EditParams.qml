@@ -50,6 +50,7 @@ Item {
             Rectangle {
                 Layout.fillHeight: true;
                 Layout.fillWidth: true;
+                Layout.alignment: Qt.AlignCenter
                 color: Style.white
                 radius: Style.defaultRadius
                 border.width: Style.defaultWidth
@@ -144,6 +145,12 @@ Item {
                                             color: Style.orange
                                             text: "Edit"
                                             textColor: Style.white
+                                            onClicked: {
+                                                if(_roomController && _roomController.editableComponent) {
+                                                    editTimePopup.index = index
+                                                    editTimePopup.open();
+                                                }
+                                            }
                                         }
                                         CustomButton {
                                             id: removeTimeButton
@@ -155,6 +162,10 @@ Item {
                                             color: Style.red
                                             image: Style.trashcan
                                             textColor: Style.white
+                                            onClicked: {
+                                                if(_roomController && _roomController.editableComponent)
+                                                    _roomController.editableComponent.deleteTimePlan(index)
+                                            }
                                         }
                                     }
                                 }
@@ -167,6 +178,9 @@ Item {
                                     color: Style.semiTransparent
                                     text: "Додати"
                                     textColor: Style.green
+                                    onClicked: {
+                                        addTimePopup.open()
+                                    }
                                 }
                                 Item {
                                     Layout.fillHeight: true;
@@ -257,6 +271,61 @@ Item {
                         root.declined()
                     }
                 }
+            }
+        }
+    }
+    Popup {
+        id: addTimePopup
+        width: root.width
+        height: root.height
+        modal: true
+        dim: true
+        focus: true
+        background: Rectangle {
+            color: Style.transparent
+        }
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        contentItem: EditTime {
+            headerText: "Зміна часу"
+            onAccepted: function(hE, mE, hD, mD) {
+                console.log("addTimePopup::accepted", hE, mE, hD, mD)
+                if(_roomController && _roomController.editableComponent){
+                    console.log("addTimePopup::accepted", hE, mE, hD, mD)
+                    _roomController.editableComponent.addTimePlan(hE, mE, hD, mD)
+                }
+
+                addTimePopup.close();
+            }
+            onDeclined:{
+                addTimePopup.close();
+            }
+        }
+    }
+    Popup {
+        id: editTimePopup
+        width: root.width
+        height: root.height
+        modal: true
+        dim: true
+        focus: true
+        background: Rectangle {
+            color: Style.transparent
+        }
+        property int index: 0
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        contentItem: EditTime {
+            headerText: "Зміна часу"
+            onAccepted: function(hE, mE, hD, mD) {
+                console.log("editTimePopup::accepted", hE, mE, hD, mD)
+                if(_roomController && _roomController.editableComponent){
+                    console.log("editTimePopup::accepted", hE, mE, hD, mD)
+                    _roomController.editableComponent.editTimePlan(editTimePopup.index, hE, mE, hD, mD)
+                }
+
+                editTimePopup.close();
+            }
+            onDeclined:{
+                editTimePopup.close();
             }
         }
     }

@@ -43,7 +43,7 @@ Item {
                 textColor: Style.white
                 fontSize: height * 0.5
                 fontFamily: Style.fontMain.name
-                text: "Статус підключення"
+                text: _appController.status
             }
             CustomButton {
                 Layout.fillHeight: true;
@@ -55,6 +55,9 @@ Item {
                 fontSize: height * 0.5
                 fontFamily: Style.fontMain.name
                 image: Style.bluetooth
+                onClicked: {
+                    _appController.restartClient()
+                }
             }
         }
         RowLayout {
@@ -184,8 +187,8 @@ Item {
                         isAuto: _roomController.components[index].isAuto ? "Автоматичний" : "Ручний"
 
 
-//                        enabledAt: enDate.toTimeString();
-//                        disabledAt: disDate.toTimeString();
+                        enabledAt: _roomController.components[index].enStr
+                        disabledAt: _roomController.components[index].disStr
                         additionalInfo: _roomController.components[index].info
 
                         onSwitchClicked: {
@@ -358,6 +361,7 @@ Item {
         contentItem: EditParams {
             headerText: editComponentPopup.headerText
             onAccepted: {
+                _roomController.saveEditComponent();
                 editComponentPopup.close();
             }
             onDeclined:{

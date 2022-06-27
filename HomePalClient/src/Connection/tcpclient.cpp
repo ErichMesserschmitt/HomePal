@@ -64,8 +64,18 @@ ClientTCP::ClientTCP(const QUrl &url, bool debug, QObject *parent) : IClient(url
     m_debug = false;
     if (m_debug)
         qDebug() << "WebSocket server:" << url;
+    m_pingTimer = new QTimer();
+    m_pingTimer->setInterval(10000);
+    m_waitTimer = new QTimer();
+    m_waitTimer->setInterval(7000);
+    m_waitTimer->setSingleShot(true);
     connect(&m_webSocket, &QWebSocket::connected, this, &ClientTCP::onConnected);
     connect(&m_webSocket, &QWebSocket::disconnected, this, &ClientTCP::closed);
+    connect(m_waitTimer, &QTimer::timeout, this, &ClientTCP::connectionLost);
+    connect(m_waitTimer, &QTimer::timeout, this, &ClientTCP::onConnectionLost);
+
+    connect(&m_webSocket, &QWebSocket::pong, this, &ClientTCP::onPingReceived);
+    connect(m_pingTimer, &QTimer::timeout, this, &ClientTCP::prepareSendPing);
     m_webSocket.open(url);
 }
 
@@ -85,11 +95,13 @@ void ClientTCP::onConnected()
     connect(&m_webSocket, &QWebSocket::binaryMessageReceived,
             this, &ClientTCP::onDataReceived);
 
+    m_pingTimer->start();
     QJsonObject initRequest;
     initRequest["ConnType"] = ConnType::Init;
     initRequest["Word"] = m_passcode;
     QByteArray initRequestByte = QJsonDocument(initRequest).toJson();
     m_webSocket.sendBinaryMessage(initRequestByte);
+    Q_EMIT connected();
 }
 
 
@@ -112,6 +124,34 @@ void ClientTCP::onDataReceived(QByteArray data)
     QJsonDocument receivedDoc;
     receivedDoc = QJsonDocument::fromJson(data);
     setReceivedData(receivedDoc);
+}
+
+void ClientTCP::onPingSent()
+{
+    qDebug() << "ClientTCP::onPingSent ping sent";
+    m_waitTimer->start();
+}
+
+void ClientTCP::onConnectionLost()
+{
+    qDebug() << "ClientTCP::onConnectionLost stop timers";
+
+    m_pingTimer->stop();
+    m_waitTimer->stop();
+}
+
+void ClientTCP::onPingReceived(quint64 elapsedTime,const QByteArray &payload)
+{
+    qDebug() << "ClientTCP::onPingReceived ping received" << elapsedTime << payload;
+    m_waitTimer->stop();
+    m_waitTimer->setInterval(7000);
+}
+
+void ClientTCP::prepareSendPing()
+{
+    qDebug() << "ClientTCP::prepareSendPing seinding ping";
+    m_webSocket.ping(QByteArray("testping"));
+    onPingSent();
 }
 
 void ClientTCP::setReceivedData(QJsonDocument &doc)
